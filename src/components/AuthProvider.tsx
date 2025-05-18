@@ -29,7 +29,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     checkSession();
 
     // Configurar listener para mudanu00e7as na autenticau00e7u00e3o
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
         router.push('/auth/login');
       }
