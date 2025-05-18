@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
-export default function LoginPage() {
+// Componente que usa useSearchParams
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirectTo') || '/admin';
@@ -114,5 +115,14 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Componente principal que envolve o conteúdo com Suspense
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen flex-col items-center justify-center">Carregando...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
