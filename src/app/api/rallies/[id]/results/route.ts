@@ -3,9 +3,9 @@ import { getRallyResults } from '@/lib/supabase-server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = context.params;
   
   try {
     const results = await getRallyResults(id);
