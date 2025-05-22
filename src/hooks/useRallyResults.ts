@@ -9,6 +9,7 @@ export function useRallyResults() {
   const fetchResults = async (rallyId: string) => {
     setLoading(true);
     setError(null);
+    console.log('Fetching rally results...', rallyId);
 
     try {
       const response = await fetch(`/api/rallies/${rallyId}/results`);

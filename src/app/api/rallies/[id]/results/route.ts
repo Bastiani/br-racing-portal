@@ -5,10 +5,16 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
-  
   try {
-    const results = await getRallyResults(id);
+    const { id } = await params ?? {}
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Erro ao buscar resultados do rally' },
+        { status: 404 }
+      );
+    }
+    const results = await getRallyResults(id as string);
     return NextResponse.json(results);
   } catch (error) {
     console.error('Erro ao buscar resultados:', error);

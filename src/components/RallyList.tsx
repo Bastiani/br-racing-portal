@@ -16,12 +16,7 @@ export default function RallyList() {
     rallies,
     loading,
     error,
-  } = useRsfOnlineRally({
-    orderBy: {
-      column: 'rally_name',
-      ascending: true
-    }
-  });
+  } = useRsfOnlineRally();
 
   // Manipulador para adicionar um novo rally
   // const handleAddRally = async (e: React.FormEvent) => {
