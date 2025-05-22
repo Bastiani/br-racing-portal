@@ -10,7 +10,7 @@ import { getRallyById } from '@/lib/supabase-server';
 // GET /api/rallies/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params ?? {}
 
