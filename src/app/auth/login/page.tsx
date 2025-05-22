@@ -28,7 +28,6 @@ function LoginContent() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     setError(null);
-    console.log('Attempting Google login', redirectTo);
     
     try {
       const { error } = await supabase.auth.signInWithOAuth({
