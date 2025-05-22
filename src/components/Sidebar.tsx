@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FiHome, FiFileText, FiSettings } from 'react-icons/fi';
+import { FiHome, FiFileText, FiSettings, FiFlag } from 'react-icons/fi';
 
 type SidebarItemProps = {
   icon: React.ReactNode;
@@ -31,6 +31,7 @@ export default function Sidebar() {
         
         <nav className="flex flex-col gap-2">
           <SidebarItem icon={<FiHome size={20} />} text="Dashboard" href="/admin" />
+          <SidebarItem icon={<FiFlag size={20} />} text="Rallies" href="/admin/rallies" />
           <SidebarItem icon={<FiFileText size={20} />} text="Relatórios" href="/admin/reports" />
           <SidebarItem icon={<FiSettings size={20} />} text="Configurações" href="/admin/settings" />
         </nav>

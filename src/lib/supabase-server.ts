@@ -1,6 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 import type { RsfOnlineRally, RsfResult } from '../types/supabase';
 
+interface RsfUser {
+  id: string;
+  name: string;
+  victories: number;
+  nationality: string;
+  rsf_id: number;
+}
+
 // Inicializa o cliente Supabase para uso no lado do servidor
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
@@ -112,4 +120,48 @@ export async function getRallyResults(rallyId: string) {
   }
 
   return data as RsfResult[];
+}
+
+// Função para buscar todos os resultados de pilotos brasileiros
+export async function getBrazilianResults(): Promise<RsfResult[]> {
+  const { data, error } = await supabase
+    .from('rsf-results')
+    .select(`
+      userid,
+      user_name,
+      real_name,
+      nationality
+    `)
+    .eq('nationality', 'BR')
+
+  if (error) {
+    console.error('Erro ao buscar resultados de pilotos brasileiros:', error);
+    throw error;
+  }
+
+  // Usar um Map para manter apenas o resultado mais recente de cada usuário
+  const uniqueResults = new Map<number, RsfResult>();
+  (data as RsfResult[]).forEach((result) => {
+    if (!uniqueResults.has(result.userid)) {
+      uniqueResults.set(result.userid, result);
+    }
+  });
+
+  return Array.from(uniqueResults.values());
+}
+
+// Função para criar um novo usuário na tabela rsf-users
+export async function createRsfUser(userData: Omit<RsfUser, 'id'>) {
+  const { data, error } = await supabase
+    .from('rsf-users')
+    .insert([userData])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Erro ao criar usuário:', error);
+    throw error;
+  }
+
+  return data as RsfUser;
 }

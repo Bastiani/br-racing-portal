@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRsfOnlineRally } from '../hooks/useRsfOnlineRally';
 // import type { RsfOnlineRally } from '../types/supabase';
 
@@ -16,7 +16,20 @@ export default function RallyList() {
     rallies,
     loading,
     error,
+    fetchRallies
   } = useRsfOnlineRally();
+
+  const options = useMemo(() => ({
+      limit: 5,
+      orderBy: {
+        column: 'created_at',
+        ascending: false
+      }
+    }), []);
+
+  useEffect(() => {
+      fetchRallies(options);
+    }, [fetchRallies, options]);
 
   // Manipulador para adicionar um novo rally
   // const handleAddRally = async (e: React.FormEvent) => {
@@ -83,7 +96,7 @@ export default function RallyList() {
       {/* Botão para recarregar dados */}
       <button 
         onClick={() => {}} 
-        className="mb-4 p-2 bg-gray-200 rounded hover:bg-gray-300"
+        className="mb-4 p-2 text-black bg-gray-200 rounded hover:bg-gray-300"
       >
         Atualizar Lista
       </button>
