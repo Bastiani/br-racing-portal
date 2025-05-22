@@ -1,8 +1,11 @@
 'use client'
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRsfOnlineRally } from '@/hooks/useRsfOnlineRally'
+import { useRallyResults } from '@/hooks/useRallyResults'
+import { RallyResults } from './RallyResults';
 
 export function ChampionshipList() {
+  const [selectedRally, setSelectedRally] = useState<string | null>(null);
   const options = useMemo(() => ({
     limit: 5,
     orderBy: {
@@ -10,11 +13,24 @@ export function ChampionshipList() {
       ascending: false
     }
   }), []);
+  
   const { rallies, loading, error, fetchRallies } = useRsfOnlineRally();
+  const { 
+    results, 
+    loading: loadingResults, 
+    error: resultsError, 
+    fetchResults 
+  } = useRallyResults();
 
   useEffect(() => {
     fetchRallies(options);
   }, []);
+
+  useEffect(() => {
+    if (selectedRally) {
+      fetchResults(selectedRally);
+    }
+  }, [selectedRally]);
 
   if (loading) {
     return (
@@ -41,23 +57,39 @@ export function ChampionshipList() {
             <thead className="bg-[#ff6b00] text-white">
               <tr>
                 <th className="px-6 py-4 text-left font-bold">Nome</th>
-                {/* <th className="px-6 py-4 text-left font-bold">ID</th> */}
                 <th className="px-6 py-4 text-left font-bold">Data de Criação</th>
+                <th className="px-6 py-4 text-left font-bold">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">
               {rallies?.map((rally) => (
                 <tr key={rally.id} className="text-white hover:bg-[#ff6b00]/10 transition-colors">
                   <td className="px-6 py-4 font-medium">{rally.rally_name}</td>
-                  {/* <td className="px-6 py-4">{rally.rally_id}</td> */}
                   <td className="px-6 py-4">
                     {new Date(rally.created_at).toLocaleDateString('pt-BR')}
+                  </td>
+                  <td className="px-6 py-4">
+                    <button
+                      onClick={() => setSelectedRally(rally.id)}
+                      className="bg-[#ff6b00] text-white px-4 py-2 rounded hover:bg-[#ff6b00]/80 transition-colors"
+                    >
+                      Ver Resultados
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
+        {selectedRally && (
+          <RallyResults
+            results={results}
+            loading={loadingResults}
+            error={resultsError}
+            onClose={() => setSelectedRally(null)}
+          />
+        )}
       </div>
     </section>
   )

@@ -1,6 +1,20 @@
 export interface RsfOnlineRally {
-  id: string; // uuid
-  created_at: string; // timestamp with time zone
-  rally_name: string; // text
-  rally_id: number; // numeric
+  id: string;
+  rally_name: string;
+  rally_id: string;
+  created_at: string;
+}
+
+export interface RsfResult {
+  position: number;
+  userid: number;
+  user_name: string;
+  real_name: string;
+  nationality: string;
+  car: string;
+  time3: string;
+  super_rally: string;
+  penalty: string;
+  id: string;
+  rsf_rally: string;
 }

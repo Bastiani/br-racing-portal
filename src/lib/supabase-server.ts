@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import type { RsfOnlineRally } from '../types/supabase';
+import type { RsfOnlineRally, RsfResult } from '../types/supabase';
 
 // Inicializa o cliente Supabase para uso no lado do servidor
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
@@ -84,4 +84,32 @@ export async function getRalliesWithFilters({
   }
   
   return data as RsfOnlineRally[];
+}
+
+// Função para buscar resultados de um rally específico
+export async function getRallyResults(rallyId: string) {
+  const { data, error } = await supabase
+    .from('rsf-results')
+    .select(`
+      position,
+      userid,
+      user_name,
+      real_name,
+      nationality,
+      car,
+      time3,
+      super_rally,
+      penalty,
+      id,
+      rsf_rally
+    `)
+    .eq('rsf_rally', rallyId)
+    .order('position');
+
+  if (error) {
+    console.error(`Erro ao buscar resultados do rally ${rallyId}:`, error);
+    throw error;
+  }
+
+  return data as RsfResult[];
 }

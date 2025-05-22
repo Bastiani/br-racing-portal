@@ -1,4 +1,4 @@
-import Link from 'next/link';
+// import Link from 'next/link';
 import Image from 'next/image';
 import { ChampionshipList } from '@/components/ChampionshipList';
 
@@ -21,14 +21,14 @@ export default function Home() {
               <li><a href="#championships" className="hover:text-[#ff6b00] transition-colors">Campeonatos</a></li>
               <li><a href="#drivers" className="hover:text-[#ff6b00] transition-colors">Pilotos</a></li>
               <li><a href="#about" className="hover:text-[#ff6b00] transition-colors">Sobre</a></li>
-              <li>
+              {/* <li>
                 <Link 
                   href="/admin" 
                   className="bg-[#ff6b00] hover:bg-[#ff8533] px-4 py-2 rounded-md transition-colors"
                 >
                   Área do Piloto
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </nav>
         </div>
