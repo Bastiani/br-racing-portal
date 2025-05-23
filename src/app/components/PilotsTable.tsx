@@ -12,6 +12,7 @@ export default async function PilotsTable() {
     { header: '3º Lugar', className: 'text-center' },
   ];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rows = pilots && pilots.length > 0 ? pilots.map((pilot: any) => [
     pilot.name,
     <div className="flex flex-col items-center" key="first">
