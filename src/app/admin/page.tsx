@@ -36,7 +36,10 @@ export default function AdminDashboard() {
             rsf_id: result.userid,
             name: result.real_name || result.user_name,
             nationality: result.nationality,
-            victories: 0 // Iniciando com 0 vitórias
+            victories: 0,
+            first: 0,
+            second: 0,
+            third: 0,
           });
           created++;
           setCreationStatus(`Criados ${created} usuários de ${brazilianResults.length}...`);

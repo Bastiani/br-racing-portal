@@ -1,5 +1,8 @@
-import { createClient } from '@supabase/supabase-js';
-import type { RsfOnlineRally, RsfResult } from '../types/supabase';
+import { createClient as supabaseClient } from '@supabase/supabase-js';
+// import type { NextApiRequest, NextApiResponse } from 'next';
+
+import { RsfOnlineRally, RsfResult } from '@/types/supabase';
+import { createClient } from '@/utils/supabase/client';
 
 interface RsfUser {
   id: string;
@@ -7,12 +10,17 @@ interface RsfUser {
   victories: number;
   nationality: string;
   rsf_id: number;
+  first: number;
+  second: number;
+  third: number;
 }
 
 // Inicializa o cliente Supabase para uso no lado do servidor
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+const supabaseAuth = createClient();
+const supabase = supabaseClient(supabaseUrl, supabaseAnonKey);
 
 // Função para buscar todos os rallies
 export async function getAllRallies() {
@@ -130,9 +138,10 @@ export async function getBrazilianResults(): Promise<RsfResult[]> {
       userid,
       user_name,
       real_name,
-      nationality
+      nationality,
+      position
     `)
-    .eq('nationality', 'BR')
+    .eq('nationality', 'BR');
 
   if (error) {
     console.error('Erro ao buscar resultados de pilotos brasileiros:', error);
@@ -151,8 +160,22 @@ export async function getBrazilianResults(): Promise<RsfResult[]> {
 }
 
 // Função para criar um novo usuário na tabela rsf-users
-export async function createRsfUser(userData: Omit<RsfUser, 'id'>) {
-  const { data, error } = await supabase
+export async function createRsfUser(
+  userData: Omit<RsfUser, 'id'>,
+  // req: NextApiRequest,
+  // res: NextApiResponse
+) {  
+  const {
+    data: { user },
+    error: authError
+  } = await supabaseAuth.auth.getUser()
+  
+  if (authError || !user) {
+    throw new Error('Usuário não autenticado');
+  }
+
+  // Procede com a criação do usuário apenas se estiver autenticado
+  const { data, error } = await supabaseAuth
     .from('rsf-users')
     .insert([userData])
     .select()
@@ -164,4 +187,33 @@ export async function createRsfUser(userData: Omit<RsfUser, 'id'>) {
   }
 
   return data as RsfUser;
+}
+
+// Função para buscar todos os pódios de um piloto específico
+export async function getDriverPodiums(userId: number, position: number) {
+  const { data, error } = await supabase
+    .from('rsf-results')
+    .select(`
+      position,
+      userid,
+      user_name,
+      real_name,
+      nationality,
+      car,
+      time3,
+      super_rally,
+      penalty,
+      id,
+      rsf_rally
+    `)
+    .eq('userid', userId)
+    .in('position', position ? [position] : [1, 2, 3])
+    .order('position');
+
+  if (error) {
+    console.error(`Erro ao buscar pódios do piloto ${userId}:`, error);
+    throw error;
+  }
+
+  return data as RsfResult[];
 }

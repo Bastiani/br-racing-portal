@@ -1,13 +1,7 @@
 'use client'
 
+import { RsfOnlineRally } from '@/types/supabase'
 import { useState, useCallback } from 'react'
-
-interface RsfOnlineRally {
-  id: string
-  rally_name: string
-  rally_id: number
-  created_at: string
-}
 
 interface UseRsfOnlineRallyOptions {
   limit?: number

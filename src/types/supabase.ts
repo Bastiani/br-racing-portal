@@ -16,6 +16,6 @@ export interface RsfResult {
   super_rally?: string;
   penalty?: string;
   id?: string;
-  rsf_rally?: { rally_name: string }[]
-  rally_name?: string
+  rsf_rally?: { rally_name: string }[];
+  rally_name?: string;
 }
