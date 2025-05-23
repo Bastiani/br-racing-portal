@@ -1,6 +1,7 @@
 // import Link from 'next/link';
 import Image from 'next/image';
 import { ChampionshipList } from '@/components/ChampionshipList';
+import PilotsTable from './components/PilotsTable';
 
 export default function Home() {
   return (
@@ -57,6 +58,11 @@ export default function Home() {
             >
               Inscreva-se Agora
             </Link> */}
+          </div>
+        </section>        
+        <section id="drivers" className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <PilotsTable />
           </div>
         </section>
         <section id="championships" className="py-16 bg-gray-100">

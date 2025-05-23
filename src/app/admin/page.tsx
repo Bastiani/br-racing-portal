@@ -1,14 +1,16 @@
 'use client';
 
-import { FiUsers, FiFileText, FiActivity, FiFlag } from 'react-icons/fi';
-import { getBrazilianResults, createRsfUser } from '@/lib/supabase-server';
+import { FiUsers, FiFileText, FiActivity, FiFlag, FiAward } from 'react-icons/fi';
+import { getBrazilianResults, createRsfUser, updateDriverPodiumStats } from '@/lib/supabase-server';
 import { useEffect, useState } from 'react';
 import { RsfResult } from '@/types/supabase';
 
 export default function AdminDashboard() {
   const [brazilianResults, setBrazilianResults] = useState<RsfResult[]>([]);
   const [isCreatingUsers, setIsCreatingUsers] = useState(false);
+  const [isUpdatingStats, setIsUpdatingStats] = useState(false);
   const [creationStatus, setCreationStatus] = useState<string>('');
+  const [updateStatus, setUpdateStatus] = useState<string>('');
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -57,6 +59,32 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleUpdateStats = async () => {
+    setIsUpdatingStats(true);
+    setUpdateStatus('Iniciando atualização das estatísticas...');
+    let updated = 0;
+    let errors = 0;
+
+    try {
+      for (const result of brazilianResults) {
+        try {
+          await updateDriverPodiumStats(result.userid);
+          updated++;
+          setUpdateStatus(`Atualizados ${updated} usuários de ${brazilianResults.length}...`);
+        } catch (error) {
+          console.error('Erro ao atualizar estatísticas:', error);
+          errors++;
+        }
+      }
+
+      setUpdateStatus(`Concluído! ${updated} usuários atualizados com sucesso. ${errors} erros.`);
+    } catch {
+      setUpdateStatus('Erro ao atualizar estatísticas. Tente novamente.');
+    } finally {
+      setIsUpdatingStats(false);
+    }
+  };
+
   const stats = [
     { title: 'Usuários', value: '1,234', color: 'bg-[var(--dark-cyan)]', icon: <FiUsers className="w-5 h-5" /> },
     { title: 'Relatórios', value: '56', color: 'bg-[var(--gamboge)]', icon: <FiFileText className="w-5 h-5" /> },
@@ -95,24 +123,43 @@ export default function AdminDashboard() {
           <div className="p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Pilotos Brasileiros</h2>
-              <button
-                onClick={handleCreateUsers}
-                disabled={isCreatingUsers}
-                className={`px-4 py-2 rounded-md text-white ${
-                  isCreatingUsers 
-                    ? 'bg-gray-500 cursor-not-allowed' 
-                    : 'bg-[var(--dark-cyan)] hover:bg-[var(--dark-cyan)]/80'
-                }`}
-              >
-                {isCreatingUsers ? 'Criando usuários...' : 'Criar Usuários'}
-              </button>
+              <div className="space-x-4">
+                <button
+                  onClick={handleUpdateStats}
+                  disabled={isUpdatingStats}
+                  className={`px-4 py-2 rounded-md text-white ${
+                    isUpdatingStats 
+                      ? 'bg-gray-500 cursor-not-allowed' 
+                      : 'bg-[var(--gamboge)] hover:bg-[var(--gamboge)]/80'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <FiAward className="w-4 h-4 mr-2" />
+                    {isUpdatingStats ? 'Atualizando...' : 'Atualizar Pódios'}
+                  </div>
+                </button>
+                <button
+                  onClick={handleCreateUsers}
+                  disabled={isCreatingUsers}
+                  className={`px-4 py-2 rounded-md text-white ${
+                    isCreatingUsers 
+                      ? 'bg-gray-500 cursor-not-allowed' 
+                      : 'bg-[var(--dark-cyan)] hover:bg-[var(--dark-cyan)]/80'
+                  }`}
+                >
+                  {isCreatingUsers ? 'Criando usuários...' : 'Criar Usuários'}
+                </button>
+              </div>
             </div>
             {creationStatus && (
               <div className="mb-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-md">
                 {creationStatus}
               </div>
-            )}
-            <div className="overflow-x-auto">
+            )}            {updateStatus && (
+              <div className="mb-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-md">
+                {updateStatus}
+              </div>
+            )}            <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
                   <tr className="border-b border-[var(--card-border)]">

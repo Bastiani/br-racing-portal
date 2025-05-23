@@ -189,8 +189,20 @@ export async function createRsfUser(
   return data as RsfUser;
 }
 
+
+// Busca todos os pilotos com suas posições de pódio
+export async function getAllPilots() {
+  const { data, error } = await supabase
+    .from('rsf-users')
+    .select('id, name, first, second, third')
+    .order('name', { ascending: true });
+
+  if (error) throw error;
+  return data;
+}
+
 // Função para buscar todos os pódios de um piloto específico
-export async function getDriverPodiums(userId: number, position: number) {
+export async function getDriverPodiums(userId: number, position?: number) {
   const { data, error } = await supabase
     .from('rsf-results')
     .select(`
@@ -216,4 +228,45 @@ export async function getDriverPodiums(userId: number, position: number) {
   }
 
   return data as RsfResult[];
+}
+// Função para atualizar as estatísticas de pódios de um piloto
+export async function updateDriverPodiumStats(userId: number) {
+  try {
+    const {
+      data: { user },
+      error: authError
+    } = await supabaseAuth.auth.getUser()
+    
+    if (authError || !user) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    // Busca a quantidade de primeiros lugares
+    const firstPlaces = await getDriverPodiums(userId, 1);
+    // Busca a quantidade de segundos lugares
+    const secondPlaces = await getDriverPodiums(userId, 2);
+    // Busca a quantidade de terceiros lugares
+    const thirdPlaces = await getDriverPodiums(userId, 3);
+
+    // Atualiza a tabela rsf-users com as quantidades
+    const { data, error } = await supabaseAuth
+      .from('rsf-users')
+      .update({
+        first: firstPlaces.length,
+        second: secondPlaces.length,
+        third: thirdPlaces.length
+      })
+      .eq('rsf_id', userId)
+      .select();
+
+    if (error) {
+      console.error(`Erro ao atualizar estatísticas do piloto ${userId}:`, error);
+      throw error;
+    }
+
+    return data as RsfUser[];
+  } catch (error) {
+    console.error(`Erro ao processar estatísticas do piloto ${userId}:`, error);
+    throw error;
+  }
 }
