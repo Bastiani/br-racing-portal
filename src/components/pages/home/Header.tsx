@@ -1,7 +1,7 @@
-import Logo from "../shared/Logo";
+import Logo from "@/components/ui/Logo";
 import Link from "next/link";
 
-export default function Cabecalho() {
+export default function Header() {
   return (
     <div
       className="flex flex-col h-28"
@@ -19,7 +19,7 @@ export default function Cabecalho() {
             <ul className="flex gap-6 items-center">
               <li>
                 <Link
-                  href="/campeonatos"
+                  href="/championships"
                   className="bg-orange-700/80 p-2 rounded-lg text-amber-50 hover:bg-[#ff6b00] transition-colors"
                 >
                   Campeonatos
@@ -27,7 +27,7 @@ export default function Cabecalho() {
               </li>
               <li>
                 <Link
-                  href="/pilotos"
+                  href="/pilots"
                   className="bg-orange-700/80 p-2 rounded-lg text-amber-50 hover:bg-[#ff6b00] transition-colors"
                 >
                   Pilotos

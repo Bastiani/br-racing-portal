@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FiUser, FiLogOut, FiSettings } from 'react-icons/fi';
-import ThemeToggle from './ThemeToggle';
+import ThemeToggle from '@/components/ThemeToggle';
 import { createClient } from '@/utils/supabase/client';
 
 export default function Header() {

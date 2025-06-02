@@ -1,4 +1,4 @@
-export default function Rodape() {
+export default function Footer() {
   return (
     <div>
       <div className="h-px bg-gradient-to-r from-slate-500 via-slate-100 to-slate-500"></div>

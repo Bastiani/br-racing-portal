@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRsfOnlineRally } from '../hooks/useRsfOnlineRally';
+import { useRsfOnlineRally } from '@/hooks/useRsfOnlineRally';
 // import type { RsfOnlineRally } from '../types/supabase';
 
 export default function RallyList() {

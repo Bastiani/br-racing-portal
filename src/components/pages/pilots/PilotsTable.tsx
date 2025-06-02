@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { getAllPilots } from "@/lib/supabase-server";
-import BaseTable from "./BaseTable";
+import BaseTable from "../BaseTable";
 
 export type Pilot = {
   id: string; // ou 'number', depende de como está na sua tabela Supabase.

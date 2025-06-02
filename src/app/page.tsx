@@ -1,12 +1,12 @@
 // import Link from 'next/link';
-import Pagina from "@/app/components/template/Pagina";
-import { ItemCard } from "@/app/components/shared/ItemCard";
-import imagem from "@/utils/constants/imagens";
+import Page from "@/components/pages/home/Page";
+import { ItemCard } from "@/components/ui/ItemCard";
+import imagem from "@/utils/constants/images";
 import { IconFlag, IconTrophy } from "@tabler/icons-react";
 
 export default function Home() {
   return (
-    <Pagina>
+    <Page>
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         <video
           autoPlay
@@ -26,30 +26,24 @@ export default function Home() {
             Club voltado para campeonatos de rally, tanto em simuladores como
             simcade.
           </p>
-          {/* <Link 
-              href="/admin" 
-              className="bg-[#ff6b00] hover:bg-[#ff8533] text-white px-8 py-4 rounded-md text-xl font-medium inline-block transition-colors"
-            >
-              Inscreva-se Agora
-            </Link> */}
         </div>
       </section>
       <section className="flex md:flex-row flex-col justify-center items-center gap-8 py-16">
         <ItemCard
-          url="campeonatos"
+          url="championships"
           nome="Campeonatos"
           descricao="Resultados dos campeonatos"
           imagem={imagem.campeonatos}
           icone={<IconFlag size={32} />}
         />
         <ItemCard
-          url="pilotos"
+          url="pilots"
           nome="Ranking de Pilotos"
           descricao="Tabela de troféis dos pilotos"
           imagem={imagem.pilotos}
           icone={<IconTrophy size={32} />}
         />
       </section>
-    </Pagina>
+    </Page>
   );
 }

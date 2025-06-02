@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { FiUser, FiMail, FiPhone, FiBriefcase, FiSave, FiBell, FiGlobe } from 'react-icons/fi';
 import { createClient } from '@/utils/supabase/client';
 import Image from 'next/image';
-import { Card } from '@/components/Card';
-import { InputField } from '@/components/InputField';
-import { Button } from '@/components/Button';
-import { CheckboxField } from '@/components/CheckboxField';
+import { Card } from '@/components/ui/Card';
+import { InputField } from '@/components/ui/InputField';
+import { Button } from '@/components/ui/Button';
+import { CheckboxField } from '@/components/ui/CheckboxField';
 
 export default function ProfilePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

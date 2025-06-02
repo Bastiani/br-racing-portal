@@ -1,14 +1,14 @@
-import Cabecalho from "./Cabecalho";
-import Rodape from "./Rodape";
+import Header from "./Header";
+import Footer from "./Footer";
 
-export interface PaginaProps {
+export interface PageProps {
   children: React.ReactNode;
   className?: string;
-  semCabecalho?: boolean;
-  semRodape?: boolean;
+  withHeader?: boolean;
+  withFooter?: boolean;
 }
 
-export default function Pagina(props: PaginaProps) {
+export default function Page(props: PageProps) {
   return (
     <div
       className="flex flex-col min-h-screen"
@@ -26,11 +26,11 @@ export default function Pagina(props: PaginaProps) {
           backgroundPosition: "bottom",
         }}
       >
-        {!props.semCabecalho && <Cabecalho />}
+        {!props.withHeader && <Header />}
         <main className={`flex-1 flex flex-col ${props.className ?? ""}`}>
           {props.children}
         </main>
-        {!props.semRodape && <Rodape />}
+        {!props.withFooter && <Footer />}
       </div>
     </div>
   );

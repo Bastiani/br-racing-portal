@@ -1,9 +1,10 @@
 'use client';
 
-import { FiUsers, FiFileText, FiActivity, FiFlag, FiAward } from 'react-icons/fi';
+import { FiFlag, FiAward, FiMapPin } from 'react-icons/fi';
 import { getBrazilianResults, createRsfUser, updateDriverPodiumStats } from '@/lib/supabase-server';
 import { useEffect, useState } from 'react';
 import { RsfResult } from '@/types/supabase';
+import RallyForm from '@/components/pages/admin/RallyForm';
 
 export default function AdminDashboard() {
   const [brazilianResults, setBrazilianResults] = useState<RsfResult[]>([]);
@@ -11,6 +12,7 @@ export default function AdminDashboard() {
   const [isUpdatingStats, setIsUpdatingStats] = useState(false);
   const [creationStatus, setCreationStatus] = useState<string>('');
   const [updateStatus, setUpdateStatus] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'rallies'>('dashboard');
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -86,122 +88,131 @@ export default function AdminDashboard() {
   };
 
   const stats = [
-    { title: 'Usuários', value: '1,234', color: 'bg-[var(--dark-cyan)]', icon: <FiUsers className="w-5 h-5" /> },
-    { title: 'Relatórios', value: '56', color: 'bg-[var(--gamboge)]', icon: <FiFileText className="w-5 h-5" /> },
-    { title: 'Atividades', value: '832', color: 'bg-[var(--midnight-green)]', icon: <FiActivity className="w-5 h-5" /> },
     { title: 'Pilotos BR', value: brazilianResults.length.toString(), color: 'bg-green-600', icon: <FiFlag className="w-5 h-5" /> }
-  ];
-
-  const recentActivities = [
-    { user: 'João Silva', action: 'criou um novo relatório', time: '2 horas atrás' },
-    { user: 'Maria Oliveira', action: 'atualizou configurações', time: '5 horas atrás' },
-    { user: 'Pedro Santos', action: 'adicionou um novo usuário', time: '1 dia atrás' },
-    { user: 'Ana Costa', action: 'gerou relatório mensal', time: '2 dias atrás' }
   ];
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-md overflow-hidden">
-            <div className={`${stat.color} h-2`}></div>
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">{stat.title}</h3>
-                <div className="text-[var(--dark-cyan)]">{stat.icon}</div>
-              </div>
-              <p className="text-3xl font-bold mt-2">{stat.value}</p>
-            </div>
-          </div>
-        ))}
+      {/* Navegação por abas */}
+      <div className="mb-6">
+        <nav className="flex space-x-8">
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'dashboard'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => setActiveTab('rallies')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'rallies'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            <FiMapPin className="w-4 h-4 inline mr-2" />
+            Gerenciar Rallies
+          </button>
+        </nav>
       </div>
-      
-      <div className="grid grid-cols-1 gap-6">
-        <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-md overflow-hidden">
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Pilotos Brasileiros</h2>
-              <div className="space-x-4">
-                <button
-                  onClick={handleUpdateStats}
-                  disabled={isUpdatingStats}
-                  className={`px-4 py-2 rounded-md text-white ${
-                    isUpdatingStats 
-                      ? 'bg-gray-500 cursor-not-allowed' 
-                      : 'bg-[var(--gamboge)] hover:bg-[var(--gamboge)]/80'
-                  }`}
-                >
-                  <div className="flex items-center">
-                    <FiAward className="w-4 h-4 mr-2" />
-                    {isUpdatingStats ? 'Atualizando...' : 'Atualizar Pódios'}
-                  </div>
-                </button>
-                <button
-                  onClick={handleCreateUsers}
-                  disabled={isCreatingUsers}
-                  className={`px-4 py-2 rounded-md text-white ${
-                    isCreatingUsers 
-                      ? 'bg-gray-500 cursor-not-allowed' 
-                      : 'bg-[var(--dark-cyan)] hover:bg-[var(--dark-cyan)]/80'
-                  }`}
-                >
-                  {isCreatingUsers ? 'Criando usuários...' : 'Criar Usuários'}
-                </button>
-              </div>
-            </div>
-            {creationStatus && (
-              <div className="mb-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-md">
-                {creationStatus}
-              </div>
-            )}            {updateStatus && (
-              <div className="mb-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-md">
-                {updateStatus}
-              </div>
-            )}            <div className="overflow-x-auto">
-              <table className="min-w-full">
-                <thead>
-                  <tr className="border-b border-[var(--card-border)]">
-                    <th className="text-left py-3 px-4">Piloto</th>
-                    <th className="text-left py-3 px-4">Nacionalidade</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {brazilianResults.map((result) => (
-                    <tr key={result.id} className="border-b border-[var(--card-border)] hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td className="py-3 px-4">{result.real_name || result.user_name}</td>
-                      <td className="py-3 px-4">{result.nationality}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
 
-        <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-md overflow-hidden">
-          <div className="p-6">
-            <h2 className="text-xl font-bold mb-4">Atividades Recentes</h2>
-            <div className="space-y-4">
-              {recentActivities.map((activity, index) => (
-                <div key={index} className="flex items-start pb-4 border-b border-[var(--card-border)] last:border-0 last:pb-0">
-                  <div className="w-10 h-10 rounded-full bg-[var(--dark-cyan)] text-white flex items-center justify-center mr-3 flex-shrink-0">
-                    {activity.user.charAt(0)}
+      {/* Conteúdo das abas */}
+      {activeTab === 'dashboard' && (
+        <div>
+          <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            {stats.map((stat, index) => (
+              <div key={index} className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-md overflow-hidden">
+                <div className={`${stat.color} h-2`}></div>
+                <div className="p-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">{stat.title}</h3>
+                    <div className="text-[var(--dark-cyan)]">{stat.icon}</div>
                   </div>
-                  <div>
-                    <p>
-                      <span className="font-medium">{activity.user}</span>
-                      <span className="text-gray-600 dark:text-gray-400"> {activity.action}</span>
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{activity.time}</p>
+                  <p className="text-3xl font-bold mt-2">{stat.value}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6">
+            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-md overflow-hidden">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold">Pilotos Brasileiros</h2>
+                  <div className="space-x-4">
+                    <button
+                      onClick={handleUpdateStats}
+                      disabled={isUpdatingStats}
+                      className={`px-4 py-2 rounded-md text-white ${
+                        isUpdatingStats 
+                          ? 'bg-gray-500 cursor-not-allowed' 
+                          : 'bg-[var(--gamboge)] hover:bg-[var(--gamboge)]/80'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <FiAward className="w-4 h-4 mr-2" />
+                        {isUpdatingStats ? 'Atualizando...' : 'Atualizar Pódios'}
+                      </div>
+                    </button>
+                    <button
+                      onClick={handleCreateUsers}
+                      disabled={isCreatingUsers}
+                      className={`px-4 py-2 rounded-md text-white ${
+                        isCreatingUsers 
+                          ? 'bg-gray-500 cursor-not-allowed' 
+                          : 'bg-[var(--dark-cyan)] hover:bg-[var(--dark-cyan)]/80'
+                      }`}
+                    >
+                      {isCreatingUsers ? 'Criando usuários...' : 'Criar Usuários'}
+                    </button>
                   </div>
                 </div>
-              ))}
+                {creationStatus && (
+                  <div className="mb-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-md">
+                    {creationStatus}
+                  </div>
+                )}
+                {updateStatus && (
+                  <div className="mb-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-md">
+                    {updateStatus}
+                  </div>
+                )}
+                <div className="overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="border-b border-[var(--card-border)]">
+                        <th className="text-left py-3 px-4">Piloto</th>
+                        <th className="text-left py-3 px-4">Nacionalidade</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {brazilianResults.map((result) => (
+                        <tr key={result.id} className="border-b border-[var(--card-border)] hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <td className="py-3 px-4">{result.real_name || result.user_name}</td>
+                          <td className="py-3 px-4">{result.nationality}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {activeTab === 'rallies' && (
+        <div>
+          <h1 className="text-2xl font-bold mb-6">Gerenciar Rallies</h1>
+          <RallyForm />
+        </div>
+      )}
     </div>
   );
 }

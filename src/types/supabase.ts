@@ -1,7 +1,7 @@
 export interface RsfOnlineRally {
   id: string;
   rally_name: string;
-  rally_id: string;
+  rally_id: number;
   created_at: string;
 }
 

@@ -3,7 +3,7 @@ import { createClient as supabaseClient } from "@supabase/supabase-js";
 
 import { RsfOnlineRally, RsfResult } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/client";
-import { Pilot } from "@/app/components/PilotsTable";
+import { Pilot } from "@/components/pages/pilots/PilotsTable";
 
 interface RsfUser {
   id: string;
@@ -189,6 +189,50 @@ export async function createRsfUser(
   }
 
   return data as RsfUser;
+}
+
+// Função para criar um novo rally na tabela rsf-online-rally
+export async function createRally(rallyData: {
+  rally_name: string;
+  rally_id: number;
+}) {
+  const {
+    data: { user },
+    error: authError,
+  } = await supabaseAuth.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error("Usuário não autenticado");
+  }
+
+  const { data, error } = await supabaseAuth
+    .from("rsf-online-rally")
+    .insert([rallyData])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Erro ao criar rally:", error);
+    throw error;
+  }
+
+  return data as RsfOnlineRally;
+}
+
+// Função para buscar os últimos rallies criados
+export async function getLatestRallies(limit: number = 10) {
+  const { data, error } = await supabase
+    .from("rsf-online-rally")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("Erro ao buscar últimos rallies:", error);
+    throw error;
+  }
+
+  return data as RsfOnlineRally[];
 }
 
 // Busca todos os pilotos com suas posições de pódio

@@ -4,14 +4,14 @@ import { useEffect, useMemo } from "react";
 import { useRsfOnlineRally } from "@/hooks/useRsfOnlineRally";
 import Link from "next/link";
 import Image from "next/image";
-import imagem from "@/utils/constants/imagens";
+import images from "@/utils/constants/images";
 import { IconDirectionSign } from "@tabler/icons-react";
 
 interface ListaCampeonatosProps {
   imagens?: string[];
 }
 
-export default function ListaCampeonatos({ imagens }: ListaCampeonatosProps) {
+export default function ChampionshipsList({ imagens }: ListaCampeonatosProps) {
   const options = useMemo(
     () => ({
       limit: 16,
@@ -54,7 +54,7 @@ export default function ListaCampeonatos({ imagens }: ListaCampeonatosProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {rallies?.map((rally, index) => {
-            const imagemRally = imagens?.[index] || imagem.campeonatos;
+            const imagemRally = imagens?.[index] || images.campeonatos;
 
             return (
               <div
@@ -79,7 +79,7 @@ export default function ListaCampeonatos({ imagens }: ListaCampeonatosProps) {
                   </p>
                   <div className="flex justify-end">
                     <Link
-                      href={`/campeonatos/${rally.id}`}
+                      href={`/championships/${rally.id}`}
                       className="inline-block text-end bg-[#ff6b00] text-white px-4 py-2 rounded-full hover:bg-orange-700/80 transition-colors"
                     >
                       {<IconDirectionSign size={32} />}

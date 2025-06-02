@@ -1,25 +1,41 @@
-import { NextResponse } from 'next/server';
-import { getAllRallies, getRallyById } from '@/lib/supabase-server';
+import { NextRequest, NextResponse } from 'next/server';
+import { createRally, getLatestRallies } from '@/lib/supabase-server';
 
-// GET /api/rallies
-export async function GET(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    const body = await request.json();
+    const { rally_name, rally_id } = body;
 
-    if (id) {
-      // Se um ID for fornecido, busca um rally específico
-      const rally = await getRallyById(id);
-      return NextResponse.json(rally);
-    } else {
-      // Caso contrário, busca todos os rallies
-      const rallies = await getAllRallies();
-      return NextResponse.json(rallies);
+    if (!rally_name || !rally_id) {
+      return NextResponse.json(
+        { error: 'Nome do rally e ID são obrigatórios' },
+        { status: 400 }
+      );
     }
+
+    const newRally = await createRally({
+      rally_name,
+      rally_id: parseInt(rally_id),
+    });
+
+    return NextResponse.json(newRally, { status: 201 });
   } catch (error) {
-    console.error('Erro na API de rallies:', error);
+    console.error('Erro ao criar rally:', error);
     return NextResponse.json(
-      { error: 'Erro ao buscar dados de rallies' },
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  try {
+    const rallies = await getLatestRallies(10);
+    return NextResponse.json(rallies);
+  } catch (error) {
+    console.error('Erro ao buscar rallies:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
       { status: 500 }
     );
   }
