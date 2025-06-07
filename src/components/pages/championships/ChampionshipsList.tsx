@@ -7,11 +7,11 @@ import Image from "next/image";
 import images from "@/utils/constants/images";
 import { IconDirectionSign } from "@tabler/icons-react";
 
-interface ListaCampeonatosProps {
+interface ChampionshipListProps {
   imagens?: string[];
 }
 
-export default function ChampionshipsList({ imagens }: ListaCampeonatosProps) {
+export default function ChampionshipsList({ imagens }: ChampionshipListProps) {
   const options = useMemo(
     () => ({
       limit: 16,
@@ -40,7 +40,7 @@ export default function ChampionshipsList({ imagens }: ListaCampeonatosProps) {
   if (error) {
     return (
       <div className="text-red-500 p-4">
-        Erro ao carregar campeonatos: {error.message}
+        Erro ao carregar 4fun: {error.message}
       </div>
     );
   }
@@ -49,7 +49,7 @@ export default function ChampionshipsList({ imagens }: ListaCampeonatosProps) {
     <section id="championships" className="py-16">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-3xl font-bold text-[#E0E1DD] mb-8">
-          Últimos Campeonatos
+          Últimos 4FUN´s
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

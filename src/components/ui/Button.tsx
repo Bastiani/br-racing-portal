@@ -1,25 +1,58 @@
-import { IconType } from 'react-icons';
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "@/lib/utils"
+import { IconType } from 'react-icons'
 
-interface ButtonProps {
-  children: React.ReactNode;
-  icon?: IconType;
-  onClick?: () => void;
-  variant?: 'default' | 'profile';
+const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  {
+    variants: {
+      variant: {
+        default: "bg-[var(--dark-cyan)] text-white shadow hover:bg-[var(--midnight-green)]",
+        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+        outline: "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+        profile: "bg-blue-500 text-white shadow hover:bg-blue-600",
+      },
+      size: {
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-md px-3 text-xs",
+        lg: "h-10 rounded-md px-8",
+        icon: "h-9 w-9",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+  icon?: IconType
 }
 
-export function Button({ children, icon: Icon, onClick, variant = 'default' }: ButtonProps) {
-  const styles = {
-    default: "bg-[var(--dark-cyan)] hover:bg-[var(--midnight-green)] text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2",
-    profile: "bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2"
-  };
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, icon: Icon, children, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      >
+        {Icon && <Icon className="w-4 h-4" />}
+        {children}
+      </Comp>
+    )
+  }
+)
+Button.displayName = "Button"
 
-  return (
-    <button 
-      onClick={onClick}
-      className={styles[variant]}
-    >
-      {Icon && <Icon className="w-4 h-4" />}
-      <span>{children}</span>
-    </button>
-  );
-}
+export { Button, buttonVariants }

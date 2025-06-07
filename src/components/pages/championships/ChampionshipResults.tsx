@@ -25,9 +25,9 @@ export default function ChampionshipsResults() {
   const moreResults = results?.slice(3) || [];
 
   return (
-    <section id="championshipsResult"> 
+    <section id="championshipsResult">
       <h1 className="text-4xl font-bold text-[#E0E1DD] mb-8 mt-8">
-        Resultados do Campeonato
+        Resultados do 4FUN
       </h1>
 
       {loading ? (

@@ -1,54 +1,59 @@
-import { IconType } from 'react-icons';
+import * as React from "react"
+import { cn } from "@/lib/utils"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { IconType } from 'react-icons'
+import { cva, type VariantProps } from "class-variance-authority"
 
-interface InputFieldProps {
-  label: string;
-  type?: 'text' | 'email' | 'password';
-  defaultValue?: string;
-  value?: string;
-  placeholder?: string;
-  icon?: IconType;
-  variant?: 'default' | 'profile';
-  readOnly?: boolean;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
-
-export function InputField({ 
-  label, 
-  type = 'text', 
-  defaultValue, 
-  value,
-  placeholder, 
-  icon: Icon,
-  variant = 'default',
-  readOnly,
-  onChange
-}: InputFieldProps) {
-  const styles = {
-    default: {
-      input: "w-full border border-[var(--card-border)] bg-[var(--background)] rounded-md px-3 py-2",
-      icon: "text-[var(--dark-cyan)] w-4 h-4"
+const inputFieldVariants = cva(
+  "space-y-2",
+  {
+    variants: {
+      variant: {
+        default: "",
+        profile: "space-y-3",
+      },
     },
-    profile: {
-      input: "w-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-md px-3 py-2",
-      icon: "text-blue-500 w-4 h-4"
-    }
-  };
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
 
-  return (
-    <div>
-      <label className="block text-sm font-medium mb-1 flex items-center gap-2">
-        {Icon && <Icon className={styles[variant].icon} />}
-        <span>{label}</span>
-      </label>
-      <input 
-        type={type}
-        className={styles[variant].input}
-        defaultValue={defaultValue}
-        value={value}
-        placeholder={placeholder}
-        readOnly={readOnly}
-        onChange={onChange}
-      />
-    </div>
-  );
+export interface InputFieldProps
+  extends React.InputHTMLAttributes<HTMLInputElement>,
+    VariantProps<typeof inputFieldVariants> {
+  label: string
+  icon?: IconType
+  error?: string
 }
+
+const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
+  ({ className, variant, label, icon: Icon, error, ...props }, ref) => {
+    return (
+      <div className={cn(inputFieldVariants({ variant }))}>
+        <Label htmlFor={props.id}>{label}</Label>
+        <div className="relative">
+          {Icon && (
+            <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          )}
+          <Input
+            ref={ref}
+            className={cn(
+              Icon && "pl-10",
+              error && "border-destructive",
+              className
+            )}
+            {...props}
+          />
+        </div>
+        {error && (
+          <p className="text-sm text-destructive">{error}</p>
+        )}
+      </div>
+    )
+  }
+)
+InputField.displayName = "InputField"
+
+export { InputField }

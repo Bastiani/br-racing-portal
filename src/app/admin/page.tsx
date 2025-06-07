@@ -1,18 +1,24 @@
-'use client';
+"use client";
 
-import { FiFlag, FiAward, FiMapPin } from 'react-icons/fi';
-import { getBrazilianResults, createRsfUser, updateDriverPodiumStats } from '@/lib/supabase-server';
-import { useEffect, useState } from 'react';
-import { RsfResult } from '@/types/supabase';
-import RallyForm from '@/components/pages/admin/RallyForm';
+import { IconFlag, IconAward, IconMapPin } from "@tabler/icons-react";
+import {
+  getBrazilianResults,
+  createRsfUser,
+  updateDriverPodiumStats,
+} from "@/lib/supabase-server";
+import { useEffect, useState } from "react";
+import { RsfResult } from "@/types/supabase";
+import RallyForm from "@/components/pages/admin/RallyForm";
 
 export default function AdminDashboard() {
   const [brazilianResults, setBrazilianResults] = useState<RsfResult[]>([]);
   const [isCreatingUsers, setIsCreatingUsers] = useState(false);
   const [isUpdatingStats, setIsUpdatingStats] = useState(false);
-  const [creationStatus, setCreationStatus] = useState<string>('');
-  const [updateStatus, setUpdateStatus] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'rallies'>('dashboard');
+  const [creationStatus, setCreationStatus] = useState<string>("");
+  const [updateStatus, setUpdateStatus] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "rallies">(
+    "dashboard"
+  );
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -20,7 +26,7 @@ export default function AdminDashboard() {
         const results = await getBrazilianResults();
         setBrazilianResults(results);
       } catch (error) {
-        console.error('Erro ao buscar resultados:', error);
+        console.error("Erro ao buscar resultados:", error);
       }
     };
 
@@ -29,7 +35,7 @@ export default function AdminDashboard() {
 
   const handleCreateUsers = async () => {
     setIsCreatingUsers(true);
-    setCreationStatus('Iniciando criação de usuários...');
+    setCreationStatus("Iniciando criação de usuários...");
     let created = 0;
     let errors = 0;
 
@@ -46,16 +52,20 @@ export default function AdminDashboard() {
             third: 0,
           });
           created++;
-          setCreationStatus(`Criados ${created} usuários de ${brazilianResults.length}...`);
+          setCreationStatus(
+            `Criados ${created} usuários de ${brazilianResults.length}...`
+          );
         } catch (error) {
-          console.error('Erro ao criar usuário:', error);
+          console.error("Erro ao criar usuário:", error);
           errors++;
         }
       }
 
-      setCreationStatus(`Concluído! ${created} usuários criados com sucesso. ${errors} erros.`);
+      setCreationStatus(
+        `Concluído! ${created} usuários criados com sucesso. ${errors} erros.`
+      );
     } catch {
-      setCreationStatus('Erro ao criar usuários. Tente novamente.');
+      setCreationStatus("Erro ao criar usuários. Tente novamente.");
     } finally {
       setIsCreatingUsers(false);
     }
@@ -63,7 +73,7 @@ export default function AdminDashboard() {
 
   const handleUpdateStats = async () => {
     setIsUpdatingStats(true);
-    setUpdateStatus('Iniciando atualização das estatísticas...');
+    setUpdateStatus("Iniciando atualização das estatísticas...");
     let updated = 0;
     let errors = 0;
 
@@ -72,23 +82,32 @@ export default function AdminDashboard() {
         try {
           await updateDriverPodiumStats(result.userid);
           updated++;
-          setUpdateStatus(`Atualizados ${updated} usuários de ${brazilianResults.length}...`);
+          setUpdateStatus(
+            `Atualizados ${updated} usuários de ${brazilianResults.length}...`
+          );
         } catch (error) {
-          console.error('Erro ao atualizar estatísticas:', error);
+          console.error("Erro ao atualizar estatísticas:", error);
           errors++;
         }
       }
 
-      setUpdateStatus(`Concluído! ${updated} usuários atualizados com sucesso. ${errors} erros.`);
+      setUpdateStatus(
+        `Concluído! ${updated} usuários atualizados com sucesso. ${errors} erros.`
+      );
     } catch {
-      setUpdateStatus('Erro ao atualizar estatísticas. Tente novamente.');
+      setUpdateStatus("Erro ao atualizar estatísticas. Tente novamente.");
     } finally {
       setIsUpdatingStats(false);
     }
   };
 
   const stats = [
-    { title: 'Pilotos BR', value: brazilianResults.length.toString(), color: 'bg-green-600', icon: <FiFlag className="w-5 h-5" /> }
+    {
+      title: "Pilotos BR",
+      value: brazilianResults.length.toString(),
+      color: "bg-green-600",
+      icon: <IconFlag className="w-5 h-5" />,
+    },
   ];
 
   return (
@@ -97,41 +116,46 @@ export default function AdminDashboard() {
       <div className="mb-6">
         <nav className="flex space-x-8">
           <button
-            onClick={() => setActiveTab('dashboard')}
+            onClick={() => setActiveTab("dashboard")}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'dashboard'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+              activeTab === "dashboard"
+                ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
             }`}
           >
             Dashboard
           </button>
           <button
-            onClick={() => setActiveTab('rallies')}
+            onClick={() => setActiveTab("rallies")}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'rallies'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+              activeTab === "rallies"
+                ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
             }`}
           >
-            <FiMapPin className="w-4 h-4 inline mr-2" />
+            <IconMapPin className="w-4 h-4 inline mr-2" />
             Gerenciar Rallies
           </button>
         </nav>
       </div>
 
       {/* Conteúdo das abas */}
-      {activeTab === 'dashboard' && (
+      {activeTab === "dashboard" && (
         <div>
           <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             {stats.map((stat, index) => (
-              <div key={index} className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-md overflow-hidden">
+              <div
+                key={index}
+                className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-md overflow-hidden"
+              >
                 <div className={`${stat.color} h-2`}></div>
                 <div className="p-6">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">{stat.title}</h3>
+                    <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">
+                      {stat.title}
+                    </h3>
                     <div className="text-[var(--dark-cyan)]">{stat.icon}</div>
                   </div>
                   <p className="text-3xl font-bold mt-2">{stat.value}</p>
@@ -139,7 +163,7 @@ export default function AdminDashboard() {
               </div>
             ))}
           </div>
-          
+
           <div className="grid grid-cols-1 gap-6">
             <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-md overflow-hidden">
               <div className="p-6">
@@ -150,26 +174,30 @@ export default function AdminDashboard() {
                       onClick={handleUpdateStats}
                       disabled={isUpdatingStats}
                       className={`px-4 py-2 rounded-md text-white ${
-                        isUpdatingStats 
-                          ? 'bg-gray-500 cursor-not-allowed' 
-                          : 'bg-[var(--gamboge)] hover:bg-[var(--gamboge)]/80'
+                        isUpdatingStats
+                          ? "bg-gray-500 cursor-not-allowed"
+                          : "bg-[var(--gamboge)] hover:bg-[var(--gamboge)]/80"
                       }`}
                     >
                       <div className="flex items-center">
-                        <FiAward className="w-4 h-4 mr-2" />
-                        {isUpdatingStats ? 'Atualizando...' : 'Atualizar Pódios'}
+                        <IconAward className="w-4 h-4 mr-2" />
+                        {isUpdatingStats
+                          ? "Atualizando..."
+                          : "Atualizar Pódios"}
                       </div>
                     </button>
                     <button
                       onClick={handleCreateUsers}
                       disabled={isCreatingUsers}
                       className={`px-4 py-2 rounded-md text-white ${
-                        isCreatingUsers 
-                          ? 'bg-gray-500 cursor-not-allowed' 
-                          : 'bg-[var(--dark-cyan)] hover:bg-[var(--dark-cyan)]/80'
+                        isCreatingUsers
+                          ? "bg-gray-500 cursor-not-allowed"
+                          : "bg-[var(--dark-cyan)] hover:bg-[var(--dark-cyan)]/80"
                       }`}
                     >
-                      {isCreatingUsers ? 'Criando usuários...' : 'Criar Usuários'}
+                      {isCreatingUsers
+                        ? "Criando usuários..."
+                        : "Criar Usuários"}
                     </button>
                   </div>
                 </div>
@@ -193,8 +221,13 @@ export default function AdminDashboard() {
                     </thead>
                     <tbody>
                       {brazilianResults.map((result) => (
-                        <tr key={result.id} className="border-b border-[var(--card-border)] hover:bg-gray-50 dark:hover:bg-gray-800">
-                          <td className="py-3 px-4">{result.real_name || result.user_name}</td>
+                        <tr
+                          key={result.id}
+                          className="border-b border-[var(--card-border)] hover:bg-gray-50 dark:hover:bg-gray-800"
+                        >
+                          <td className="py-3 px-4">
+                            {result.real_name || result.user_name}
+                          </td>
                           <td className="py-3 px-4">{result.nationality}</td>
                         </tr>
                       ))}
@@ -207,7 +240,7 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {activeTab === 'rallies' && (
+      {activeTab === "rallies" && (
         <div>
           <h1 className="text-2xl font-bold mb-6">Gerenciar Rallies</h1>
           <RallyForm />

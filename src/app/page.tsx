@@ -31,8 +31,8 @@ export default function Home() {
       <section className="flex md:flex-row flex-col justify-center items-center gap-8 py-16">
         <ItemCard
           url="championships"
-          nome="Campeonatos"
-          descricao="Resultados dos campeonatos"
+          nome="4FUN´s"
+          descricao="Resultados dos 4FUN´s"
           imagem={imagem.campeonatos}
           icone={<IconFlag size={32} />}
         />

@@ -1,5 +1,11 @@
-import Link from 'next/link';
-import { FiHome, FiFileText, FiSettings, FiFlag } from 'react-icons/fi';
+import Link from "next/link";
+import {
+  IconHome,
+  IconFileText,
+  IconSettings,
+  IconFlag,
+  IconFileUpload,
+} from "@tabler/icons-react";
 
 type SidebarItemProps = {
   icon: React.ReactNode;
@@ -9,8 +15,8 @@ type SidebarItemProps = {
 
 const SidebarItem = ({ icon, text, href }: SidebarItemProps) => {
   return (
-    <Link 
-      href={href} 
+    <Link
+      href={href}
       className="flex items-center gap-4 px-3 py-2 rounded-lg hover:bg-[var(--sidebar-hover)] transition-colors"
     >
       <div className="w-6 h-6 flex items-center justify-center text-[var(--tiffany-blue)]">
@@ -28,12 +34,33 @@ export default function Sidebar() {
         <div className="flex items-center justify-center h-12 mb-6">
           <div className="text-[var(--dark-cyan)] text-2xl font-bold">AD</div>
         </div>
-        
+
         <nav className="flex flex-col gap-2">
-          <SidebarItem icon={<FiHome size={20} />} text="Dashboard" href="/admin" />
-          <SidebarItem icon={<FiFlag size={20} />} text="Rallies" href="/admin/rallies" />
-          <SidebarItem icon={<FiFileText size={20} />} text="Relatórios" href="/admin/reports" />
-          <SidebarItem icon={<FiSettings size={20} />} text="Configurações" href="/admin/settings" />
+          <SidebarItem
+            icon={<IconHome size={20} />}
+            text="Dashboard"
+            href="/admin"
+          />
+          <SidebarItem
+            icon={<IconFlag size={20} />}
+            text="Rallies"
+            href="/admin/rallies"
+          />
+          <SidebarItem
+            icon={<IconFileText size={20} />}
+            text="Relatórios"
+            href="/admin/reports"
+          />
+          <SidebarItem
+            icon={<IconSettings size={20} />}
+            text="Configurações"
+            href="/admin/settings"
+          />
+          <SidebarItem
+            icon={<IconFileUpload size={20} />}
+            text="Upload CSV"
+            href="/admin/csv-upload"
+          />
         </nav>
       </div>
     </aside>
