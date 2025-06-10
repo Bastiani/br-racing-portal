@@ -1,6 +1,6 @@
-'use client'
-import { RsfResult } from '@/types/supabase';
-import ReactCountryFlag from 'react-country-flag';
+"use client";
+import { RsfResult } from "@/types";
+import ReactCountryFlag from "react-country-flag";
 
 interface RallyResultsProps {
   results: RsfResult[];
@@ -9,7 +9,12 @@ interface RallyResultsProps {
   onClose: () => void;
 }
 
-export function RallyResults({ results, loading, error, onClose }: RallyResultsProps) {
+export function RallyResults({
+  results,
+  loading,
+  error,
+  onClose,
+}: RallyResultsProps) {
   return (
     <div className="mt-8">
       <h3 className="text-2xl font-bold text-[#140f15] mb-4">
@@ -21,7 +26,7 @@ export function RallyResults({ results, loading, error, onClose }: RallyResultsP
           Fechar
         </button>
       </h3>
-      
+
       {loading ? (
         <div className="flex items-center justify-center p-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#140f15]"></div>
@@ -46,21 +51,26 @@ export function RallyResults({ results, loading, error, onClose }: RallyResultsP
             </thead>
             <tbody className="divide-y divide-gray-700">
               {results.map((result) => (
-                <tr key={result.id} className="text-white hover:bg-[#ff6b00]/10 transition-colors">
+                <tr
+                  key={result.id}
+                  className="text-white hover:bg-[#ff6b00]/10 transition-colors"
+                >
                   <td className="px-6 py-4 flex items-center gap-2">
                     {result.position === 1 && <span title="1º Lugar">🏆</span>}
                     {result.position === 2 && <span title="2º Lugar">🥈</span>}
                     {result.position === 3 && <span title="3º Lugar">🥉</span>}
                     {result.position}
                   </td>
-                  <td className="px-6 py-4">{result.real_name || result.user_name}</td>
+                  <td className="px-6 py-4">
+                    {result.real_name || result.user_name}
+                  </td>
                   <td className="px-6 py-4 flex items-center gap-2">
                     <ReactCountryFlag
                       countryCode={result.nationality}
                       svg
                       style={{
-                        width: '1.5em',
-                        height: '1.5em',
+                        width: "1.5em",
+                        height: "1.5em",
                       }}
                       title={result.nationality}
                     />

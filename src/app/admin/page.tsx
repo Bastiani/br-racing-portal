@@ -7,7 +7,7 @@ import {
   updateDriverPodiumStats,
 } from "@/lib/fourFanDB";
 import { useEffect, useState } from "react";
-import { RsfResult } from "@/types/supabase";
+import { RsfResult } from "@/types";
 import RallyForm from "@/components/pages/admin/RallyForm";
 
 export default function AdminDashboard() {

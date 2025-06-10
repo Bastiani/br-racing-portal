@@ -1,6 +1,6 @@
 "use client";
 
-import { RsfOnlineRally } from "@/types/supabase";
+import { RsfOnlineRally } from "@/types";
 import { useState, useCallback } from "react";
 
 interface UseRsfOnlineRallyOptions {

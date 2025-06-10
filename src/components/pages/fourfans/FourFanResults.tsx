@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useFourFanRallyResults } from "@/hooks/useFourFanRallyResults";
-import { RsfResult } from "@/types/supabase";
+import { RsfResult } from "@/types";
 import ReactCountryFlag from "react-country-flag";
 import { motion } from "framer-motion";
 import Image from "next/image";

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { RsfOnlineRally } from '@/types/supabase';
+import { useState, useEffect } from "react";
+import { RsfOnlineRally } from "@/types";
 
 interface RallyFormProps {
   onRallyCreated?: () => void;
@@ -9,8 +9,8 @@ interface RallyFormProps {
 
 export default function RallyForm({ onRallyCreated }: RallyFormProps) {
   const [formData, setFormData] = useState({
-    rally_name: '',
-    rally_id: '',
+    rally_name: "",
+    rally_id: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,13 +26,13 @@ export default function RallyForm({ onRallyCreated }: RallyFormProps) {
   const fetchLatestRallies = async () => {
     try {
       setLoadingRallies(true);
-      const response = await fetch('/api/rallies');
+      const response = await fetch("/api/rallies");
       if (response.ok) {
         const rallies = await response.json();
         setLatestRallies(rallies);
       }
     } catch (error) {
-      console.error('Erro ao buscar rallies:', error);
+      console.error("Erro ao buscar rallies:", error);
     } finally {
       setLoadingRallies(false);
     }
@@ -45,26 +45,26 @@ export default function RallyForm({ onRallyCreated }: RallyFormProps) {
     setSuccess(null);
 
     try {
-      const response = await fetch('/api/rallies', {
-        method: 'POST',
+      const response = await fetch("/api/rallies", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        setSuccess('Rally criado com sucesso!');
-        setFormData({ rally_name: '', rally_id: '' });
+        setSuccess("Rally criado com sucesso!");
+        setFormData({ rally_name: "", rally_id: "" });
         await fetchLatestRallies(); // Atualizar a lista
         onRallyCreated?.();
       } else {
         const errorData = await response.json();
-        setError(errorData.error || 'Erro ao criar rally');
+        setError(errorData.error || "Erro ao criar rally");
       }
     } catch (error) {
-      setError('Erro ao criar rally. Tente novamente.');
-      console.error('Erro:', error);
+      setError("Erro ao criar rally. Tente novamente.");
+      console.error("Erro:", error);
     } finally {
       setIsLoading(false);
     }
@@ -72,14 +72,14 @@ export default function RallyForm({ onRallyCreated }: RallyFormProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('pt-BR');
+    return new Date(dateString).toLocaleString("pt-BR");
   };
 
   return (
@@ -146,7 +146,7 @@ export default function RallyForm({ onRallyCreated }: RallyFormProps) {
             disabled={isLoading}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
           >
-            {isLoading ? 'Criando...' : 'Criar Rally'}
+            {isLoading ? "Criando..." : "Criar Rally"}
           </button>
         </form>
       </div>
@@ -160,7 +160,9 @@ export default function RallyForm({ onRallyCreated }: RallyFormProps) {
         {loadingRallies ? (
           <div className="text-center py-4">
             <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">Carregando rallies...</p>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">
+              Carregando rallies...
+            </p>
           </div>
         ) : latestRallies.length > 0 ? (
           <div className="overflow-x-auto">
@@ -183,7 +185,10 @@ export default function RallyForm({ onRallyCreated }: RallyFormProps) {
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {latestRallies.map((rally) => (
-                  <tr key={rally.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <tr
+                    key={rally.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {rally.id}
                     </td>
@@ -194,7 +199,7 @@ export default function RallyForm({ onRallyCreated }: RallyFormProps) {
                       {rally.rally_id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {rally.created_at ? formatDate(rally.created_at) : 'N/A'}
+                      {rally.created_at ? formatDate(rally.created_at) : "N/A"}
                     </td>
                   </tr>
                 ))}

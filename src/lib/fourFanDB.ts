@@ -1,20 +1,9 @@
 import { createClient as supabaseClient } from "@supabase/supabase-js";
 // import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { RsfOnlineRally, RsfResult } from "@/types/supabase";
+import { RsfOnlineRally, RsfResult, RsfUser } from "@/types";
 import { createClient } from "@/utils/supabase/client";
 import { Pilot } from "@/components/pages/pilots/PilotsTable";
-
-interface RsfUser {
-  id: string;
-  name: string;
-  victories: number;
-  nationality: string;
-  rsf_id: number;
-  first: number;
-  second: number;
-  third: number;
-}
 
 // Inicializa o cliente Supabase para uso no lado do servidor
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
