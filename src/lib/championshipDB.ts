@@ -364,7 +364,7 @@ export async function processStageResultsCSV(
   rallyId: number,
   stageName: string,
   stageNumber: number
-): Promise<{ success: boolean; message: string; errors?: string[] }> {
+): Promise<{ success: boolean; message: string; errors?: string[]; stageId?: number }> {
   const supabase = createClient();
   const errors: string[] = [];
 
@@ -376,37 +376,63 @@ export async function processStageResultsCSV(
       return { success: false, message: 'Erro ao criar etapa' };
     }
 
-    console.log(`Processando ${csvData.length} linhas do CSV`);
+    // Filtrar apenas pilotos brasileiros
+    const brazilianData = csvData.filter(row => {
+      const nationality = row.nationality?.toUpperCase();
+      return nationality === 'BR' || nationality === 'BRAZIL' || nationality === 'BRASIL';
+    });
 
-    // Processar cada linha do CSV
-    for (let i = 0; i < csvData.length; i++) {
-      const row = csvData[i];
+    console.log(`Dados originais: ${csvData.length} linhas`);
+    console.log(`Dados filtrados (BR): ${brazilianData.length} linhas`);
+
+    if (brazilianData.length === 0) {
+      return { success: false, message: 'Nenhum piloto brasileiro encontrado no CSV' };
+    }
+
+    // Ordenar por posição para garantir ordem correta
+    brazilianData.sort((a, b) => {
+      const posA = parseInt(a.position) || 999;
+      const posB = parseInt(b.position) || 999;
+      return posA - posB;
+    });
+
+    // Ajustar posições sequencialmente (1, 2, 3, ...)
+    const adjustedData = brazilianData.map((row, index) => ({
+      ...row,
+      position: index + 1 // Nova posição sequencial
+    }));
+
+    console.log(`Processando ${adjustedData.length} pilotos brasileiros com posições ajustadas`);
+
+    // Processar cada linha do CSV filtrado e ajustado
+    for (let i = 0; i < adjustedData.length; i++) {
+      const row = adjustedData[i];
       
       try {
         // Os dados já vêm parseados da função parseCSV
         const userid = row.userid;
         const username = row.user_name;
-        const position = row.position;
+        const position = row.position; // Posição já ajustada
         const time = row.time3;
         
         // Validar campos obrigatórios
         if (!userid || isNaN(userid)) {
-          errors.push(`Linha ${i + 2}: userid '${userid}' não é um número válido`);
+          errors.push(`Piloto ${i + 1}: userid '${userid}' não é um número válido`);
           continue;
         }
         
         if (!username) {
-          errors.push(`Linha ${i + 2}: Campo user_name não encontrado ou vazio`);
+          errors.push(`Piloto ${i + 1}: Campo user_name não encontrado ou vazio`);
           continue;
         }
         
         if (!position || isNaN(position)) {
-          errors.push(`Linha ${i + 2}: position '${position}' não é um número válido`);
+          errors.push(`Piloto ${i + 1}: position '${position}' não é um número válido`);
           continue;
         }
         
         if (!time) {
-          errors.push(`Linha ${i + 2}: Campo time3 não encontrado ou vazio`);
+          errors.push(`Piloto ${i + 1}: Campo time3 não encontrado ou vazio`);
           continue;
         }
 
@@ -425,10 +451,10 @@ export async function processStageResultsCSV(
           });
 
         if (error) {
-          errors.push(`Linha ${i + 2}: Erro ao inserir resultado - ${error.message}`);
+          errors.push(`Piloto ${i + 1}: Erro ao inserir resultado - ${error.message}`);
         }
       } catch (rowError) {
-        errors.push(`Linha ${i + 2}: Erro inesperado - ${rowError}`);
+        errors.push(`Piloto ${i + 1}: Erro inesperado - ${rowError}`);
       }
     }
 
@@ -441,7 +467,11 @@ export async function processStageResultsCSV(
       };
     }
 
-    return { success: true, message: 'CSV processado com sucesso' };
+    return { 
+      success: true, 
+      message: `CSV processado com sucesso! ${adjustedData.length} pilotos brasileiros importados com posições ajustadas.`,
+      stageId: stage.id
+    };
   } catch (error) {
     console.error('Erro ao processar CSV:', error);
     return { success: false, message: `Erro ao processar CSV: ${error}` };
@@ -507,4 +537,20 @@ export async function getRallyById(id: number): Promise<RsfRally | null> {
   }
 
   return data;
+}
+
+// Função para buscar pilotos que participaram de uma etapa específica
+export async function getPilotsByStageId(stageId: number): Promise<number[]> {
+  const { data, error } = await supabase
+    .from('rsf_stage_results')
+    .select('pilot_id')
+    .eq('stage_id', stageId);
+
+  if (error) {
+    throw new Error(`Erro ao buscar pilotos da etapa: ${error.message}`);
+  }
+
+  // Retornar apenas IDs únicos dos pilotos
+  const uniquePilotIds = [...new Set(data?.map(result => result.pilot_id) || [])];
+  return uniquePilotIds;
 }

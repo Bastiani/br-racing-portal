@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { processStageResultsCSV, calculateAndInsertRallyResult, updateRallyPositionsAndPoints, updateChampionshipStandings } from '@/lib/championshipDB';
+// Primeiro, importe a nova função
+import { processStageResultsCSV, calculateAndInsertRallyResult, updateRallyPositionsAndPoints, updateChampionshipStandings, getPilotsByStageId } from '@/lib/championshipDB';
 import { parseCSV } from '@/utils/parseCSV';
 
 export async function POST(request: Request) {
@@ -51,35 +52,28 @@ export async function POST(request: Request) {
     }
 
     // Calcular resultados gerais do rally para todos os pilotos
-    // Filtrar e validar pilotIds antes de processar
-    const validPilotIds = csvData
-      .map(row => {
-        const parsedId = row.userid;
-        
-        if (isNaN(parsedId) || !parsedId) {
-          console.warn(`Invalid userid found: '${parsedId}' in row:`, row);
-          return null;
-        }
-        
-        return parsedId;
-      })
-      .filter(id => id !== null) // Remove valores nulos
-      .filter((id, index, array) => array.indexOf(id) === index); // Remove duplicatas
-    
-    console.log('Valid pilot IDs:', validPilotIds);
-    
-    if (validPilotIds.length === 0) {
-      return NextResponse.json({ 
-        error: 'Nenhum ID de piloto válido encontrado no CSV. Verifique se a coluna userid existe e contém valores numéricos válidos.' 
-      }, { status: 400 });
-    }
-    
-    for (const pilotId of validPilotIds) {
-      try {
-        await calculateAndInsertRallyResult(rallyId, pilotId);
-      } catch (error) {
-        console.error(`Erro ao calcular resultado do piloto ${pilotId}:`, error);
+    // Buscar apenas pilotos que foram realmente inseridos na etapa
+    try {
+      const validPilotIds = await getPilotsByStageId(result.stageId!);
+      
+      console.log('Valid pilot IDs from stage results:', validPilotIds);
+      
+      if (validPilotIds.length === 0) {
+        return NextResponse.json({ 
+          error: 'Nenhum piloto encontrado nos resultados da etapa.' 
+        }, { status: 400 });
       }
+      
+      for (const pilotId of validPilotIds) {
+        try {
+          await calculateAndInsertRallyResult(rallyId, pilotId);
+        } catch (error) {
+          console.error(`Erro ao calcular resultado do piloto ${pilotId}:`, error);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar pilotos da etapa:', error);
+      return NextResponse.json({ error: 'Erro ao buscar pilotos da etapa' }, { status: 500 });
     }
 
     // Atualizar posições e pontos do rally
