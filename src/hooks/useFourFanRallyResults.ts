@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import type { RsfResult } from "../types/supabase";
 
-export function useRallyResults() {
+export function useFourFanRallyResults() {
   const [results, setResults] = useState<RsfResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -12,7 +12,7 @@ export function useRallyResults() {
     console.log("Fetching rally results...", rallyId);
 
     try {
-      const response = await fetch(`/api/rallies/${rallyId}/results`);
+      const response = await fetch(`/api/fourfanrallies/${rallyId}/results`);
       if (!response.ok) {
         throw new Error("Falha ao buscar resultados");
       }

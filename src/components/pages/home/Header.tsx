@@ -19,7 +19,7 @@ export default function Header() {
             <ul className="flex gap-6 items-center">
               <li>
                 <Link
-                  href="/championships"
+                  href="/fourfans"
                   className="bg-orange-700/80 p-2 rounded-lg text-amber-50 hover:bg-[#ff6b00] transition-colors"
                 >
                   4FUN´s

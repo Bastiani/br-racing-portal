@@ -2,18 +2,18 @@
 
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useRallyResults } from "@/hooks/useRallyResults";
+import { useFourFanRallyResults } from "@/hooks/useFourFanRallyResults";
 import { RsfResult } from "@/types/supabase";
 import ReactCountryFlag from "react-country-flag";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-export default function ChampionshipsResults() {
+export default function FourFanResults() {
   const params = useParams();
   const router = useRouter();
   const rallyId = params?.id as string;
 
-  const { results, loading, error, fetchResults } = useRallyResults();
+  const { results, loading, error, fetchResults } = useFourFanRallyResults();
 
   useEffect(() => {
     if (rallyId) {
@@ -25,7 +25,7 @@ export default function ChampionshipsResults() {
   const moreResults = results?.slice(3) || [];
 
   return (
-    <section id="championshipsResult">
+    <section id="fourFanResult">
       <h1 className="text-4xl font-bold text-[#E0E1DD] mb-8 mt-8">
         Resultados do 4FUN
       </h1>
@@ -160,7 +160,7 @@ export default function ChampionshipsResults() {
       )}
 
       <button
-        onClick={() => router.push("/championships")}
+        onClick={() => router.push("/fourFan")}
         className="h-8 w-28 mb-8 text-sm bg-orange-700/80 text-white px-3 py-1 rounded hover:bg-[#ff6b00] cursor-pointer transition-colors"
       >
         Voltar

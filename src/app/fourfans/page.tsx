@@ -1,11 +1,11 @@
-import ChampionshipsList from "@/components/pages/championships/ChampionshipsList";
+import FourFansList from "@/components/pages/fourfans/FourFanList";
 import Page from "@/components/pages/home/Page";
 import imagens from "@/utils/constants/championshipImages";
 
-export default function Campeonatos() {
+export default function FourFanRallies() {
   return (
     <Page className="container">
-      <ChampionshipsList imagens={imagens} />
+      <FourFansList imagens={imagens} />
     </Page>
   );
 }

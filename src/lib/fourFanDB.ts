@@ -131,7 +131,7 @@ export async function createRsfUser(
 }
 
 // Função para criar um novo rally na tabela rsf-online-rally
-export async function createRally(rallyData: {
+export async function createFourFanRally(rallyData: {
   rally_name: string;
   rally_id: number;
 }) {
@@ -160,7 +160,7 @@ export async function createRally(rallyData: {
 }
 
 // Função para buscar os últimos rallies criados
-export async function getLatestRallies(limit: number = 10) {
+export async function getFourFanLatestRallies(limit: number = 10) {
   const { data, error } = await supabase
     .from("rsf-online-rally")
     .select("*")

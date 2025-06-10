@@ -7,11 +7,11 @@ import Image from "next/image";
 import images from "@/utils/constants/images";
 import { IconDirectionSign } from "@tabler/icons-react";
 
-interface ChampionshipListProps {
+interface FourFanListProps {
   imagens?: string[];
 }
 
-export default function ChampionshipsList({ imagens }: ChampionshipListProps) {
+export default function FourFansList({ imagens }: FourFanListProps) {
   const options = useMemo(
     () => ({
       limit: 16,
@@ -79,7 +79,7 @@ export default function ChampionshipsList({ imagens }: ChampionshipListProps) {
                   </p>
                   <div className="flex justify-end">
                     <Link
-                      href={`/championships/${rally.id}`}
+                      href={`/fourfans/${rally.id}`}
                       className="inline-block text-end bg-[#ff6b00] text-white px-4 py-2 rounded-full hover:bg-orange-700/80 transition-colors"
                     >
                       {<IconDirectionSign size={32} />}
