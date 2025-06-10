@@ -6,9 +6,11 @@ import Page from '@/components/pages/home/Page';
 import { 
   getChampionshipById, 
   getRalliesByChampionship, 
-  getChampionshipStandings 
+  getChampionshipStandings,
+  getStagesByRally,
+  getStageResults
 } from '@/lib/championshipDB';
-import { RsfChampionship, RsfRally } from '@/types/championship';
+import { RsfChampionship, RsfRally, RsfStage } from '@/types/championship';
 import Link from 'next/link';
 import { 
   IconTrophy, 
@@ -16,7 +18,11 @@ import {
   IconMapPin, 
   IconArrowLeft,
   IconMedal,
-  IconFlag
+  IconFlag,
+  IconChevronDown,
+  IconChevronUp,
+  IconClock,
+  IconTarget
 } from '@tabler/icons-react';
 
 interface ChampionshipStanding {
@@ -32,6 +38,29 @@ interface ChampionshipStanding {
   podiums: number;
 }
 
+interface StageResultWithPilot {
+  id: number;
+  stage_id: number;
+  pilot_id: number;
+  car_id?: number;
+  position: number;
+  stage_time: string;
+  penalty_time: string;
+  super_rally: boolean;
+  dnf: boolean;
+  dsq: boolean;
+  created_at: Date;
+  rsf_pilots: {
+    userid: number;
+    username: string;
+    real_name: string;
+    nationality: string;
+  };
+  rsf_cars?: {
+    model: string;
+  };
+}
+
 export default function ChampionshipDetails() {
   const params = useParams();
   const championshipId = parseInt(params.id as string);
@@ -39,6 +68,12 @@ export default function ChampionshipDetails() {
   const [championship, setChampionship] = useState<RsfChampionship | null>(null);
   const [rallies, setRallies] = useState<RsfRally[]>([]);
   const [standings, setStandings] = useState<ChampionshipStanding[]>([]);
+  const [expandedRally, setExpandedRally] = useState<number | null>(null);
+  const [rallyStages] = useState<{ [rallyId: number]: RsfStage[] }>({});
+  const [selectedStage, setSelectedStage] = useState<number | null>(null);
+  const [stageResults, setStageResults] = useState<StageResultWithPilot[]>([]);
+  const [loadingStages, setLoadingStages] = useState(false);
+  const [loadingResults, setLoadingResults] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,6 +101,69 @@ export default function ChampionshipDetails() {
       loadChampionshipData();
     }
   }, [championshipId]);
+
+  const handleRallyClick = async (rallyId: number) => {
+    if (expandedRally === rallyId) {
+      setExpandedRally(null);
+      setSelectedStage(null);
+      setStageResults([]);
+      return;
+    }
+
+    setExpandedRally(rallyId);
+    setSelectedStage(null);
+    setStageResults([]);
+
+    if (!rallyStages[rallyId]) {
+      setLoadingStages(true);
+      try {
+        const stages = await getStagesByRally(rallyId);
+        rallyStages[rallyId] = stages;
+      } catch (err) {
+        console.error('Erro ao carregar etapas:', err);
+      } finally {
+        setLoadingStages(false);
+      }
+    }
+  };
+
+  const handleStageClick = async (stageId: number) => {
+    if (selectedStage === stageId) {
+      setSelectedStage(null);
+      setStageResults([]);
+      return;
+    }
+
+    setSelectedStage(stageId);
+    setLoadingResults(true);
+    try {
+      const results = await getStageResults(stageId);
+      setStageResults(results);
+    } catch (err) {
+      console.error('Erro ao carregar resultados da etapa:', err);
+    } finally {
+      setLoadingResults(false);
+    }
+  };
+
+  const formatTime = (timeString: string) => {
+    if (!timeString || timeString === '00:00:00') return '-';
+    return timeString;
+  };
+
+  const getStatusColor = (result: StageResultWithPilot) => {
+    if (result.dsq) return 'text-red-400';
+    if (result.dnf) return 'text-orange-400';
+    if (result.super_rally) return 'text-yellow-400';
+    return 'text-white';
+  };
+
+  const getStatusText = (result: StageResultWithPilot) => {
+    if (result.dsq) return 'DSQ';
+    if (result.dnf) return 'DNF';
+    if (result.super_rally) return 'SR';
+    return '';
+  };
 
   if (loading) {
     return (
@@ -165,37 +263,148 @@ export default function ChampionshipDetails() {
             ) : (
               <div className="space-y-4">
                 {rallies.map((rally) => (
-                  <div key={rally.id} className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-white">{rally.name}</h3>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        rally.status === 'finished' 
-                          ? 'bg-green-500/20 text-green-400'
-                          : rally.status === 'ongoing'
-                          ? 'bg-yellow-500/20 text-yellow-400'
-                          : rally.status === 'scheduled'
-                          ? 'bg-blue-500/20 text-blue-400'
-                          : 'bg-red-500/20 text-red-400'
-                      }`}>
-                        {rally.status === 'finished' ? 'Finalizado' :
-                         rally.status === 'ongoing' ? 'Em andamento' :
-                         rally.status === 'scheduled' ? 'Agendado' : 'Cancelado'}
-                      </span>
+                  <div key={rally.id} className="bg-white/5 rounded-lg overflow-hidden">
+                    <div 
+                      className="p-4 hover:bg-white/10 transition-colors cursor-pointer"
+                      onClick={() => handleRallyClick(rally.id)}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center">
+                          <h3 className="font-semibold text-white mr-2">{rally.name}</h3>
+                          {expandedRally === rally.id ? 
+                            <IconChevronUp size={16} className="text-white/60" /> : 
+                            <IconChevronDown size={16} className="text-white/60" />
+                          }
+                        </div>
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          rally.status === 'finished' 
+                            ? 'bg-green-500/20 text-green-400'
+                            : rally.status === 'ongoing'
+                            ? 'bg-yellow-500/20 text-yellow-400'
+                            : rally.status === 'scheduled'
+                            ? 'bg-blue-500/20 text-blue-400'
+                            : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {rally.status === 'finished' ? 'Finalizado' :
+                           rally.status === 'ongoing' ? 'Em andamento' :
+                           rally.status === 'scheduled' ? 'Agendado' : 'Cancelado'}
+                        </span>
+                      </div>
+                      
+                      {rally.location && (
+                        <div className="flex items-center text-white/60 mb-2">
+                          <IconMapPin size={14} className="mr-1" />
+                          <span className="text-sm">{rally.location}</span>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center text-white/60">
+                        <IconCalendar size={14} className="mr-1" />
+                        <span className="text-sm">
+                          {new Date(rally.rally_date).toLocaleDateString('pt-BR')}
+                        </span>
+                      </div>
                     </div>
-                    
-                    {rally.location && (
-                      <div className="flex items-center text-white/60 mb-2">
-                        <IconMapPin size={14} className="mr-1" />
-                        <span className="text-sm">{rally.location}</span>
+
+                    {/* Etapas do Rally */}
+                    {expandedRally === rally.id && (
+                      <div className="border-t border-white/10 p-4">
+                        <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
+                          <IconTarget size={18} className="mr-2 text-orange-400" />
+                          Etapa
+                        </h4>
+                        
+                        {loadingStages ? (
+                          <div className="text-center py-4">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto"></div>
+                          </div>
+                        ) : rallyStages[rally.id]?.length === 0 ? (
+                          <p className="text-white/60 text-sm">Nenhuma etapa encontrada</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {rallyStages[rally.id]?.map((stage) => (
+                              <div key={stage.id}>
+                                <div 
+                                  className="bg-white/5 rounded p-3 hover:bg-white/10 transition-colors cursor-pointer"
+                                  onClick={() => handleStageClick(stage.id)}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center">
+                                      <span className="text-orange-400 font-semibold mr-2">
+                                        RSF ID: {stage.stage_number}
+                                      </span>
+                                      {/* <span className="text-white text-sm">{stage.stage_name}</span> */}
+                                      {selectedStage === stage.id ? 
+                                        <IconChevronUp size={14} className="ml-2 text-white/60" /> : 
+                                        <IconChevronDown size={14} className="ml-2 text-white/60" />
+                                      }
+                                    </div>
+                                    {stage.distance_km && (
+                                      <span className="text-white/60 text-xs">
+                                        {stage.distance_km} km
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Resultados da Etapa */}
+                                {selectedStage === stage.id && (
+                                  <div className="mt-2 bg-white/5 rounded p-3">
+                                    <h5 className="text-white font-medium mb-3 flex items-center">
+                                      <IconClock size={16} className="mr-2 text-orange-400" />
+                                      Resultados
+                                    </h5>
+                                    
+                                    {loadingResults ? (
+                                      <div className="text-center py-4">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mx-auto"></div>
+                                      </div>
+                                    ) : stageResults.length === 0 ? (
+                                      <p className="text-white/60 text-xs">Nenhum resultado encontrado</p>
+                                    ) : (
+                                      <div className="space-y-1 max-h-60 overflow-y-auto">
+                                        {stageResults.map((result) => (
+                                          <div key={result.id} className="flex items-center justify-between py-1 px-2 bg-white/5 rounded text-xs">
+                                            <div className="flex items-center">
+                                              <span className="w-6 text-orange-400 font-semibold">
+                                                {result.position}º
+                                              </span>
+                                              <span className={`ml-2 ${getStatusColor(result)}`}>
+                                                {result.rsf_pilots.real_name || result.rsf_pilots.username}
+                                              </span>
+                                              {getStatusText(result) && (
+                                                <span className={`ml-2 px-1 rounded text-xs ${getStatusColor(result)}`}>
+                                                  {getStatusText(result)}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                              {result.rsf_cars && (
+                                                <span className="text-white/60">
+                                                  {result.rsf_cars.model}
+                                                </span>
+                                              )}
+                                              <span className="text-white font-mono">
+                                                {formatTime(result.stage_time)}
+                                              </span>
+                                              {result.penalty_time !== '00:00:00' && (
+                                                <span className="text-red-400 font-mono">
+                                                  +{formatTime(result.penalty_time)}
+                                                </span>
+                                              )}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
-                    
-                    <div className="flex items-center text-white/60">
-                      <IconCalendar size={14} className="mr-1" />
-                      <span className="text-sm">
-                        {new Date(rally.rally_date).toLocaleDateString('pt-BR')}
-                      </span>
-                    </div>
                   </div>
                 ))}
               </div>

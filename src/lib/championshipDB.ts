@@ -554,3 +554,44 @@ export async function getPilotsByStageId(stageId: number): Promise<number[]> {
   const uniquePilotIds = [...new Set(data?.map(result => result.pilot_id) || [])];
   return uniquePilotIds;
 }
+
+// Função para buscar etapas de um rally
+export async function getStagesByRally(rallyId: number): Promise<RsfStage[]> {
+  const { data, error } = await supabase
+    .from('rsf_stages')
+    .select('*')
+    .eq('rally_id', rallyId)
+    .order('stage_number', { ascending: true });
+
+  if (error) {
+    throw new Error(`Erro ao buscar etapas: ${error.message}`);
+  }
+
+  return data || [];
+}
+
+// Função para buscar resultados de uma etapa específica com dados dos pilotos
+export async function getStageResults(stageId: number): Promise<any[]> {
+  const { data, error } = await supabase
+    .from('rsf_stage_results')
+    .select(`
+      *,
+      rsf_pilots!inner(
+        userid,
+        username,
+        real_name,
+        nationality
+      ),
+      rsf_cars(
+        model
+      )
+    `)
+    .eq('stage_id', stageId)
+    .order('position', { ascending: true });
+
+  if (error) {
+    throw new Error(`Erro ao buscar resultados da etapa: ${error.message}`);
+  }
+
+  return data || [];
+}
