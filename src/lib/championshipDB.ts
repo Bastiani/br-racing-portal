@@ -203,16 +203,18 @@ export async function calculateAndInsertRallyResult(rallyId: number, pilotId: nu
   // Por enquanto, vamos inserir com posição 0 e atualizar depois
   const { data, error } = await supabase
     .from('rsf_rally_points')
-    .insert({
+    .upsert({
       rally_id: rallyId,
       pilot_id: pilotId,
       overall_position: 0, // Será atualizado depois
       total_time: totalTime,
       points_earned: 0 // Será calculado depois
+    }, {
+      onConflict: 'rally_id,pilot_id'
     })
     .select()
     .single();
-
+  
   if (error) {
     throw new Error(`Erro ao inserir resultado do rally: ${error.message}`);
   }
@@ -306,8 +308,10 @@ export async function updateChampionshipStandings(championshipId: number): Promi
         wins: stats.wins,
         podiums: stats.podiums,
         last_updated: new Date().toISOString()
+      }, {
+        onConflict: 'championship_id,pilot_id'
       });
-
+  
     if (upsertError) {
       throw new Error(`Erro ao atualizar classificação: ${upsertError.message}`);
     }

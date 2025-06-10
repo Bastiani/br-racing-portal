@@ -42,6 +42,13 @@ export default function AdminDashboard() {
     setCurrentStep('championship');
   };
 
+  // Adicionar nova função para ir direto para importação
+  const goToImportExisting = () => {
+    setSelectedChampionshipId(undefined);
+    setSelectedRallyId(undefined);
+    setCurrentStep('import');
+  };
+
   useEffect(() => {
     const fetchResults = async () => {
       try {
@@ -280,29 +287,50 @@ export default function AdminDashboard() {
         <div>
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">Gestão de Campeonato</h1>
-            <Button onClick={resetFlow} variant="outline">
-              Reiniciar Fluxo
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={goToImportExisting} variant="outline">
+                Importar em Campeonato Existente
+              </Button>
+              <Button onClick={resetFlow} variant="outline">
+                Reiniciar Fluxo
+              </Button>
+            </div>
           </div>
 
-          {/* Indicador de progresso */}
+          {/* Indicador de progresso - ajustar para mostrar quando está no modo de importação direta */}
           <div className="flex items-center space-x-4 mb-8">
-            <div className={`flex items-center space-x-2 ${currentStep === 'championship' ? 'text-blue-600' : currentStep === 'rally' || currentStep === 'import' ? 'text-green-600' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'championship' ? 'bg-blue-600 text-white' : currentStep === 'rally' || currentStep === 'import' ? 'bg-green-600 text-white' : 'bg-gray-300'}`}>
+            <div className={`flex items-center space-x-2 ${
+              currentStep === 'championship' ? 'text-blue-600' : 
+              currentStep === 'rally' || currentStep === 'import' ? 'text-green-600' : 'text-gray-400'
+            }`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                currentStep === 'championship' ? 'bg-blue-600 text-white' : 
+                currentStep === 'rally' || currentStep === 'import' ? 'bg-green-600 text-white' : 'bg-gray-300'
+              }`}>
                 1
               </div>
               <span>Campeonato</span>
             </div>
             <div className="flex-1 h-px bg-gray-300"></div>
-            <div className={`flex items-center space-x-2 ${currentStep === 'rally' ? 'text-blue-600' : currentStep === 'import' ? 'text-green-600' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'rally' ? 'bg-blue-600 text-white' : currentStep === 'import' ? 'bg-green-600 text-white' : 'bg-gray-300'}`}>
+            <div className={`flex items-center space-x-2 ${
+              currentStep === 'rally' ? 'text-blue-600' : 
+              currentStep === 'import' ? 'text-green-600' : 'text-gray-400'
+            }`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                currentStep === 'rally' ? 'bg-blue-600 text-white' : 
+                currentStep === 'import' ? 'bg-green-600 text-white' : 'bg-gray-300'
+              }`}>
                 2
               </div>
               <span>Rally</span>
             </div>
             <div className="flex-1 h-px bg-gray-300"></div>
-            <div className={`flex items-center space-x-2 ${currentStep === 'import' ? 'text-blue-600' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'import' ? 'bg-blue-600 text-white' : 'bg-gray-300'}`}>
+            <div className={`flex items-center space-x-2 ${
+              currentStep === 'import' ? 'text-blue-600' : 'text-gray-400'
+            }`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                currentStep === 'import' ? 'bg-blue-600 text-white' : 'bg-gray-300'
+              }`}>
                 3
               </div>
               <span>Importar CSV</span>
