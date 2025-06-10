@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getChampionshipStandings } from "@/lib/championship-server";
+import { getChampionshipStandings } from "@/lib/rsf-championship";
 
 export async function GET(
   request: NextRequest,

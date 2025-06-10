@@ -29,6 +29,9 @@ interface CsvRow {
 export default function CsvUploadForm({ onUploadSuccess }: CsvUploadFormProps) {
   const [file, setFile] = useState<File | null>(null);
   const [championshipId, setChampionshipId] = useState("");
+  const [extractedRsfRallyId, setExtractedRsfRallyId] = useState<number | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -39,7 +42,18 @@ export default function CsvUploadForm({ onUploadSuccess }: CsvUploadFormProps) {
     const selectedFile = e.target.files?.[0];
     if (selectedFile && selectedFile.type === "text/csv") {
       setFile(selectedFile);
-      setError(null);
+      // Extrair rsf_rally_id do nome do arquivo
+      const fileName = selectedFile.name;
+      const match = fileName.match(/^(\d+)_/);
+      if (match) {
+        const rsfRallyId = parseInt(match[1]);
+        setExtractedRsfRallyId(rsfRallyId);
+      } else {
+        setExtractedRsfRallyId(null);
+        setError(
+          "Nome do arquivo deve começar com números seguidos de underscore (ex: 123_rally.csv)"
+        );
+      }
       parseCsvFile(selectedFile);
     } else {
       setError("Por favor, selecione um arquivo CSV válido.");
@@ -66,7 +80,7 @@ export default function CsvUploadForm({ onUploadSuccess }: CsvUploadFormProps) {
           data.push(row);
         }
       }
-      setCsvData(parseCSV(data, championshipId));
+      setCsvData(parseCSV(data, championshipId, extractedRsfRallyId));
       setShowPreview(true);
     };
     reader.readAsText(file);

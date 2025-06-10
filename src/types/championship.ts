@@ -94,4 +94,5 @@ export interface CsvResult {
   super_rally: number;
   penalty: number;
   rsf_rally?: string;
+  rsf_rally_id?: number | null;
 }

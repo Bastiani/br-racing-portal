@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getRallyById } from '@/lib/supabase-server';
+import { NextRequest, NextResponse } from "next/server";
+import { getFourFanRallyById } from "@/lib/fourFanDB";
 // import { createClient } from '@supabase/supabase-js';
 
 // Inicializa o cliente Supabase
@@ -12,17 +12,17 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params ?? {}
+  const { id } = (await params) ?? {};
 
   if (!id) {
     return NextResponse.json(
-      { error: 'Erro ao buscar resultados do rally' },
+      { error: "Erro ao buscar resultados do rally" },
       { status: 404 }
     );
   }
 
   try {
-    const rally = await getRallyById(id as string);
+    const rally = await getFourFanRallyById(id as string);
     return NextResponse.json(rally);
   } catch (error) {
     console.error(`Erro ao buscar rally com ID ${id}:`, error);
@@ -40,7 +40,7 @@ export async function GET(
 // ) {
 //   try {
 //     const body = await request.json();
-    
+
 //     // Verifica se o corpo da requisiu00e7u00e3o contu00e9m dados vu00e1lidos
 //     if (!body.rally_name && body.rally_id === undefined) {
 //       return NextResponse.json(
@@ -48,7 +48,7 @@ export async function GET(
 //         { status: 400 }
 //       );
 //     }
-    
+
 //     // Atualiza o rally no Supabase
 //     const { data, error } = await supabase
 //       .from('rsf-online-rally')
@@ -58,16 +58,16 @@ export async function GET(
 //       })
 //       .eq('id', params.id)
 //       .select();
-    
+
 //     if (error) throw error;
-    
+
 //     if (!data || data.length === 0) {
 //       return NextResponse.json(
 //         { error: `Rally com ID ${params.id} não encontrado` },
 //         { status: 404 }
 //       );
 //     }
-    
+
 //     return NextResponse.json(data[0]);
 //   } catch (error) {
 //     console.error(`Erro ao atualizar rally com ID ${params.id}:`, error);
@@ -89,9 +89,9 @@ export async function GET(
 //       .from('rsf-online-rally')
 //       .delete()
 //       .eq('id', params.id);
-    
+
 //     if (error) throw error;
-    
+
 //     return NextResponse.json(
 //       { success: true, message: `Rally com ID ${params.id} excluido com sucesso` }
 //     );

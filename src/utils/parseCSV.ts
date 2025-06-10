@@ -11,7 +11,8 @@ export function parseCSV(
     super_rally: string;
     penalty: string;
   }[],
-  championshipId: string
+  championshipId: string,
+  rsfRallyId?: number | null
 ) {
   return csvData.map((row) => {
     // Pega a primeira (e única) chave do objeto
@@ -44,6 +45,7 @@ export function parseCSV(
       super_rally: parseInt(rowData.super_rally) || 0,
       penalty: parseInt(rowData.penalty) || 0,
       rsf_rally: championshipId,
+      rsf_rally_id: rsfRallyId || null,
     };
   });
 }

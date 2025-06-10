@@ -2,10 +2,10 @@
 
 import { IconFlag, IconAward, IconMapPin } from "@tabler/icons-react";
 import {
-  getBrazilianResults,
+  getFourFanBrazilianResults,
   createRsfUser,
   updateDriverPodiumStats,
-} from "@/lib/supabase-server";
+} from "@/lib/fourFanDB";
 import { useEffect, useState } from "react";
 import { RsfResult } from "@/types/supabase";
 import RallyForm from "@/components/pages/admin/RallyForm";
@@ -23,7 +23,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const results = await getBrazilianResults();
+        const results = await getFourFanBrazilianResults();
         setBrazilianResults(results);
       } catch (error) {
         console.error("Erro ao buscar resultados:", error);

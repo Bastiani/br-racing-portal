@@ -20,26 +20,10 @@ interface RsfUser {
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-const supabaseAuth = createClient();
 const supabase = supabaseClient(supabaseUrl, supabaseAnonKey);
 
-// Função para buscar todos os rallies
-export async function getAllRallies() {
-  const { data, error } = await supabase
-    .from("rsf-online-rally")
-    .select("*")
-    .order("rally_name");
-
-  if (error) {
-    console.error("Erro ao buscar rallies:", error);
-    throw error;
-  }
-
-  return data as RsfOnlineRally[];
-}
-
 // Função para buscar um rally por ID
-export async function getRallyById(id: string) {
+export async function getFourFanRallyById(id: string) {
   const { data, error } = await supabase
     .from("rsf-online-rally")
     .select("*")
@@ -54,54 +38,8 @@ export async function getRallyById(id: string) {
   return data as RsfOnlineRally;
 }
 
-// Função para buscar rallies com filtros
-export async function getRalliesWithFilters({
-  limit,
-  orderBy,
-  filter,
-}: {
-  limit?: number;
-  orderBy?: {
-    column: keyof RsfOnlineRally;
-    ascending?: boolean;
-  };
-  filter?: {
-    column: keyof RsfOnlineRally;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    value: any;
-  };
-}) {
-  let query = supabase.from("rsf-online-rally").select("*");
-
-  // Aplica ordenação se especificada
-  if (orderBy) {
-    query = query.order(orderBy.column, {
-      ascending: orderBy.ascending ?? true,
-    });
-  }
-
-  // Aplica filtro se especificado
-  if (filter) {
-    query = query.eq(filter.column, filter.value);
-  }
-
-  // Aplica limite se especificado
-  if (limit) {
-    query = query.limit(limit);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error("Erro ao buscar rallies com filtros:", error);
-    throw error;
-  }
-
-  return data as RsfOnlineRally[];
-}
-
 // Função para buscar resultados de um rally específico
-export async function getRallyResults(rallyId: string) {
+export async function getFourFanRallyResults(rallyId: string) {
   const { data, error } = await supabase
     .from("rsf-results")
     .select(
@@ -131,7 +69,7 @@ export async function getRallyResults(rallyId: string) {
 }
 
 // Função para buscar todos os resultados de pilotos brasileiros
-export async function getBrazilianResults(): Promise<RsfResult[]> {
+export async function getFourFanBrazilianResults(): Promise<RsfResult[]> {
   const { data, error } = await supabase
     .from("rsf-results")
     .select(
@@ -167,6 +105,7 @@ export async function createRsfUser(
   // req: NextApiRequest,
   // res: NextApiResponse
 ) {
+  const supabaseAuth = createClient();
   const {
     data: { user },
     error: authError,
@@ -196,6 +135,7 @@ export async function createRally(rallyData: {
   rally_name: string;
   rally_id: number;
 }) {
+  const supabaseAuth = createClient();
   const {
     data: { user },
     error: authError,
@@ -280,6 +220,7 @@ export async function getDriverPodiums(userId: number, position?: number) {
 // Função para atualizar as estatísticas de pódios de um piloto
 export async function updateDriverPodiumStats(userId: number) {
   try {
+    const supabaseAuth = createClient();
     const {
       data: { user },
       error: authError,

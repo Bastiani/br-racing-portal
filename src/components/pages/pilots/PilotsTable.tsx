@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { getAllPilots } from "@/lib/supabase-server";
+import { getAllPilots } from "@/lib/fourFanDB";
 import BaseTable from "../BaseTable";
 
 export type Pilot = {
