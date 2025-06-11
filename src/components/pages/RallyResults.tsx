@@ -66,7 +66,7 @@ export function RallyResults({
                   </td>
                   <td className="px-6 py-4 flex items-center gap-2">
                     <ReactCountryFlag
-                      countryCode={result.nationality}
+                      countryCode={result.nationality || 'BR'}
                       svg
                       style={{
                         width: "1.5em",

@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { RsfResult } from "../types/supabase";
+import { RsfResult } from "@/types";
 
 export function useFourFanRallyResults() {
   const [results, setResults] = useState<RsfResult[]>([]);

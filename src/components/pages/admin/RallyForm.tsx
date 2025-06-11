@@ -61,14 +61,6 @@ export default function RallyForm({ onRallyCreated, preselectedChampionshipId }:
     }));
   };
 
-  const generateRsfRallyId = () => {
-    const uuid = crypto.randomUUID();
-    setFormData(prev => ({
-      ...prev,
-      rsf_rally: uuid
-    }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -86,7 +78,7 @@ export default function RallyForm({ onRallyCreated, preselectedChampionshipId }:
         championship_id: parseInt(formData.championship_id),
         name: formData.name,
         location: formData.location || undefined,
-        rally_date: formData.rally_date,
+        rally_date: new Date(formData.rally_date),
         rsf_rally: formData.rsf_rally,
         status: formData.status
       });
@@ -188,12 +180,9 @@ export default function RallyForm({ onRallyCreated, preselectedChampionshipId }:
                 id="rsf_rally"
                 value={formData.rsf_rally}
                 onChange={(e) => handleInputChange('rsf_rally', e.target.value)}
-                placeholder="UUID do rally no RSF"
+                placeholder="ID do rally no RSF"
                 required
               />
-              <Button type="button" onClick={generateRsfRallyId} variant="outline">
-                Gerar UUID
-              </Button>
             </div>
           </div>
 

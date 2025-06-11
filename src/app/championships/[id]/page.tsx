@@ -185,7 +185,7 @@ export default function ChampionshipDetails() {
           <div className="text-center text-red-400">
             <p>{error || 'Campeonato não encontrado'}</p>
             <Link 
-              href="/custom-championships" 
+              href="/championships" 
               className="inline-flex items-center mt-4 text-orange-400 hover:text-orange-300"
             >
               <IconArrowLeft size={16} className="mr-2" />
@@ -210,7 +210,7 @@ export default function ChampionshipDetails() {
         {/* Header */}
         <div className="mb-8">
           <Link 
-            href="/custom-championships" 
+            href="/championships" 
             className="inline-flex items-center text-orange-400 hover:text-orange-300 mb-4"
           >
             <IconArrowLeft size={16} className="mr-2" />
@@ -331,7 +331,7 @@ export default function ChampionshipDetails() {
                                   <div className="flex items-center justify-between">
                                     <div className="flex items-center">
                                       <span className="text-orange-400 font-semibold mr-2">
-                                        RSF ID: {stage.stage_number}
+                                        RSF ID: <Link href={`https://rallysimfans.hu/rbr/rally_online.php?centerbox=rally_list_details.php&rally_id=${stage.stage_number}`}>{stage.stage_number}</Link>
                                       </span>
                                       {/* <span className="text-white text-sm">{stage.stage_name}</span> */}
                                       {selectedStage === stage.id ? 

@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
+import { createClient as createServerClient } from "@/utils/supabase/server";
 import {
   RsfPilot,
   RsfChampionship,
@@ -6,16 +7,25 @@ import {
   RsfStage,
   RsfStageResult,
   RsfRallyResult,
-  RsfChampionshipStanding,
   ChampionshipCreateInput,
   RallyCreateInput,
   StageResultInput
 } from "@/types/championship";
 
-const supabase = createClient();
+async function getSupabaseClient() {
+  if (typeof window === 'undefined') {
+    // Server-side: use server client
+    return await createServerClient();
+  } else {
+    // Client-side: use browser client
+    return createClient();
+  }
+}
 
 // Função para criar ou buscar piloto
 export async function createOrGetPilot(userid: number, username: string, realName?: string, nationality: string = 'BR'): Promise<RsfPilot> {
+  const supabase = await getSupabaseClient();
+  
   // Primeiro tenta buscar o piloto existente
   const { data: existingPilot } = await supabase
     .from('rsf_pilots')
@@ -48,6 +58,8 @@ export async function createOrGetPilot(userid: number, username: string, realNam
 
 // Função para criar campeonato
 export async function createChampionship(championshipData: ChampionshipCreateInput): Promise<RsfChampionship> {
+  const supabase = await getSupabaseClient();
+  
   const { data, error } = await supabase
     .from('rsf_championships')
     .insert(championshipData)
@@ -63,6 +75,8 @@ export async function createChampionship(championshipData: ChampionshipCreateInp
 
 // Função para criar rally
 export async function createRally(rallyData: RallyCreateInput): Promise<RsfRally> {
+  const supabase = await getSupabaseClient();
+  
   const { data, error } = await supabase
     .from('rsf_rallies')
     .insert(rallyData)
@@ -78,6 +92,8 @@ export async function createRally(rallyData: RallyCreateInput): Promise<RsfRally
 
 // Função para criar etapa
 export async function createStage(rallyId: number, stageName: string, stageNumber: number, distanceKm?: number, stageType: 'special' | 'super_special' | 'power_stage' = 'special'): Promise<RsfStage> {
+  const supabase = await getSupabaseClient();
+  
   const { data, error } = await supabase
     .from('rsf_stages')
     .insert({
@@ -99,6 +115,8 @@ export async function createStage(rallyId: number, stageName: string, stageNumbe
 
 // Função para inserir resultado de etapa
 export async function insertStageResult(resultData: StageResultInput): Promise<RsfStageResult> {
+  const supabase = await getSupabaseClient();
+  
   const { data, error } = await supabase
     .from('rsf_stage_results')
     .insert({
@@ -124,6 +142,8 @@ export async function insertStageResult(resultData: StageResultInput): Promise<R
 
 // Função para calcular pontos WRC
 export async function getWrcPoints(position: number): Promise<number> {
+  const supabase = await getSupabaseClient();
+  
   const { data, error } = await supabase
     .from('rsf_wrc_points_system')
     .select('points')
@@ -139,6 +159,8 @@ export async function getWrcPoints(position: number): Promise<number> {
 
 // Função para calcular e inserir resultado geral do rally
 export async function calculateAndInsertRallyResult(rallyId: number, pilotId: number): Promise<RsfRallyResult> {
+  const supabase = await getSupabaseClient();
+  
   // Buscar todos os resultados de etapas do piloto neste rally
   const { data: stageResults, error: stageError } = await supabase
     .from('rsf_stage_results')
@@ -224,6 +246,8 @@ export async function calculateAndInsertRallyResult(rallyId: number, pilotId: nu
 
 // Função para atualizar posições e pontos do rally
 export async function updateRallyPositionsAndPoints(rallyId: number): Promise<void> {
+  const supabase = await getSupabaseClient();
+  
   // Buscar todos os resultados do rally ordenados por tempo
   const { data: results, error } = await supabase
     .from('rsf_rally_points')
@@ -256,6 +280,8 @@ export async function updateRallyPositionsAndPoints(rallyId: number): Promise<vo
 
 // Função para atualizar classificação do campeonato
 export async function updateChampionshipStandings(championshipId: number): Promise<void> {
+  const supabase = await getSupabaseClient();
+  
   // Buscar todos os pontos dos rallies do campeonato
   const { data: rallyPoints, error } = await supabase
     .from('rsf_rally_points')
@@ -344,7 +370,10 @@ export async function updateChampionshipStandings(championshipId: number): Promi
 }
 
 // Função para buscar classificação do campeonato
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getChampionshipStandings(championshipId: number): Promise<any[]> {
+  const supabase = await getSupabaseClient();
+  
   const { data, error } = await supabase
     .from('v_rsf_championship_current_standings')
     .select('*')
@@ -358,14 +387,186 @@ export async function getChampionshipStandings(championshipId: number): Promise<
   return data || [];
 }
 
+// Função para criar ou buscar carro
+export async function createOrGetCar(carModel: string): Promise<{ id: number; model: string }> {
+  const supabase = await getSupabaseClient();
+  
+  if (!carModel || carModel.trim() === '') {
+    throw new Error('Modelo do carro não pode estar vazio');
+  }
+
+  const normalizedModel = carModel.trim();
+
+  // Primeiro tenta buscar o carro existente
+  const { data: existingCar } = await supabase
+    .from('rsf_cars')
+    .select('*')
+    .eq('model', normalizedModel)
+    .single();
+
+  if (existingCar) {
+    return existingCar;
+  }
+
+  // Se não existe, cria um novo
+  const { data, error } = await supabase
+    .from('rsf_cars')
+    .insert({
+      model: normalizedModel,
+      category: 'R2' // categoria padrão
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Erro ao criar carro: ${error.message}`);
+  }
+
+  return data;
+}
+
+// Função para buscar todos os campeonatos
+export async function getAllChampionships(): Promise<RsfChampionship[]> {
+  const supabase = await getSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('rsf_championships')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(`Erro ao buscar campeonatos: ${error.message}`);
+  }
+
+  return data || [];
+}
+
+// Função para buscar rallies de um campeonato
+export async function getRalliesByChampionship(championshipId: number): Promise<RsfRally[]> {
+  const supabase = await getSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('rsf_rallies')
+    .select('*')
+    .eq('championship_id', championshipId)
+    .order('rally_date', { ascending: false });
+
+  if (error) {
+    throw new Error(`Erro ao buscar rallies: ${error.message}`);
+  }
+
+  return data || [];
+}
+
+// Função para buscar um campeonato por ID
+export async function getChampionshipById(id: number): Promise<RsfChampionship | null> {
+  const supabase = await getSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('rsf_championships')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') return null; // Not found
+    throw new Error(`Erro ao buscar campeonato: ${error.message}`);
+  }
+
+  return data;
+}
+
+// Função para buscar um rally por ID
+export async function getRallyById(id: number): Promise<RsfRally | null> {
+  const supabase = await getSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('rsf_rallies')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') return null; // Not found
+    throw new Error(`Erro ao buscar rally: ${error.message}`);
+  }
+
+  return data;
+}
+
+// Função para buscar pilotos que participaram de uma etapa específica
+export async function getPilotsByStageId(stageId: number): Promise<number[]> {
+  const supabase = await getSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('rsf_stage_results')
+    .select('pilot_id')
+    .eq('stage_id', stageId);
+
+  if (error) {
+    throw new Error(`Erro ao buscar pilotos da etapa: ${error.message}`);
+  }
+
+  // Retornar apenas IDs únicos dos pilotos
+  const uniquePilotIds = [...new Set(data?.map(result => result.pilot_id) || [])];
+  return uniquePilotIds;
+}
+
+// Função para buscar etapas de um rally
+export async function getStagesByRally(rallyId: number): Promise<RsfStage[]> {
+  const supabase = await getSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('rsf_stages')
+    .select('*')
+    .eq('rally_id', rallyId)
+    .order('stage_number', { ascending: true });
+
+  if (error) {
+    throw new Error(`Erro ao buscar etapas: ${error.message}`);
+  }
+
+  return data || [];
+}
+
+// Função para buscar resultados de uma etapa específica com dados dos pilotos
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getStageResults(stageId: number): Promise<any[]> {
+  const supabase = await getSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('rsf_stage_results')
+    .select(`
+      *,
+      rsf_pilots!inner(
+        userid,
+        username,
+        real_name,
+        nationality
+      ),
+      rsf_cars(
+        model
+      )
+    `)
+    .eq('stage_id', stageId)
+    .order('position', { ascending: true });
+
+  if (error) {
+    throw new Error(`Erro ao buscar resultados da etapa: ${error.message}`);
+  }
+
+  return data || [];
+}
+
 // Função para processar CSV de resultados
 export async function processStageResultsCSV(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   csvData: any[],
   rallyId: number,
   stageName: string,
   stageNumber: number
 ): Promise<{ success: boolean; message: string; errors?: string[]; stageId?: number }> {
-  const supabase = createClient();
+  const supabase = await getSupabaseClient();
   const errors: string[] = [];
 
   try {
@@ -414,6 +615,7 @@ export async function processStageResultsCSV(
         const username = row.user_name;
         const position = row.position; // Posição já ajustada
         const time = row.time3;
+        const carModel = row.car; // Modelo do carro
         
         // Validar campos obrigatórios
         if (!userid || isNaN(userid)) {
@@ -439,12 +641,25 @@ export async function processStageResultsCSV(
         // Criar ou obter piloto usando a função existente
         const pilot = await createOrGetPilot(userid, username, row.real_name, row.nationality);
 
+        // Criar ou obter carro (se fornecido)
+        let carId = null;
+        if (carModel && carModel.trim() !== '') {
+          try {
+            const car = await createOrGetCar(carModel);
+            carId = car.id;
+          } catch (carError) {
+            console.warn(`Erro ao processar carro '${carModel}' para piloto ${username}:`, carError);
+            // Continua sem o carro se houver erro
+          }
+        }
+
         // Inserir resultado da etapa (sem pontos - pontos são calculados no resultado geral do rally)
         const { error } = await supabase
           .from('rsf_stage_results')
           .insert({
             stage_id: stage.id,
             pilot_id: pilot.userid,
+            car_id: carId, // Adicionar o ID do carro
             position: position,
             stage_time: time,
             penalty_time: '00:00:00'
@@ -476,122 +691,4 @@ export async function processStageResultsCSV(
     console.error('Erro ao processar CSV:', error);
     return { success: false, message: `Erro ao processar CSV: ${error}` };
   }
-}
-
-// Função para buscar todos os campeonatos
-export async function getAllChampionships(): Promise<RsfChampionship[]> {
-  const { data, error } = await supabase
-    .from('rsf_championships')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new Error(`Erro ao buscar campeonatos: ${error.message}`);
-  }
-
-  return data || [];
-}
-
-// Função para buscar rallies de um campeonato
-export async function getRalliesByChampionship(championshipId: number): Promise<RsfRally[]> {
-  const { data, error } = await supabase
-    .from('rsf_rallies')
-    .select('*')
-    .eq('championship_id', championshipId)
-    .order('rally_date', { ascending: false });
-
-  if (error) {
-    throw new Error(`Erro ao buscar rallies: ${error.message}`);
-  }
-
-  return data || [];
-}
-
-// Função para buscar um campeonato por ID
-export async function getChampionshipById(id: number): Promise<RsfChampionship | null> {
-  const { data, error } = await supabase
-    .from('rsf_championships')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') return null; // Not found
-    throw new Error(`Erro ao buscar campeonato: ${error.message}`);
-  }
-
-  return data;
-}
-
-// Função para buscar um rally por ID
-export async function getRallyById(id: number): Promise<RsfRally | null> {
-  const { data, error } = await supabase
-    .from('rsf_rallies')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') return null; // Not found
-    throw new Error(`Erro ao buscar rally: ${error.message}`);
-  }
-
-  return data;
-}
-
-// Função para buscar pilotos que participaram de uma etapa específica
-export async function getPilotsByStageId(stageId: number): Promise<number[]> {
-  const { data, error } = await supabase
-    .from('rsf_stage_results')
-    .select('pilot_id')
-    .eq('stage_id', stageId);
-
-  if (error) {
-    throw new Error(`Erro ao buscar pilotos da etapa: ${error.message}`);
-  }
-
-  // Retornar apenas IDs únicos dos pilotos
-  const uniquePilotIds = [...new Set(data?.map(result => result.pilot_id) || [])];
-  return uniquePilotIds;
-}
-
-// Função para buscar etapas de um rally
-export async function getStagesByRally(rallyId: number): Promise<RsfStage[]> {
-  const { data, error } = await supabase
-    .from('rsf_stages')
-    .select('*')
-    .eq('rally_id', rallyId)
-    .order('stage_number', { ascending: true });
-
-  if (error) {
-    throw new Error(`Erro ao buscar etapas: ${error.message}`);
-  }
-
-  return data || [];
-}
-
-// Função para buscar resultados de uma etapa específica com dados dos pilotos
-export async function getStageResults(stageId: number): Promise<any[]> {
-  const { data, error } = await supabase
-    .from('rsf_stage_results')
-    .select(`
-      *,
-      rsf_pilots!inner(
-        userid,
-        username,
-        real_name,
-        nationality
-      ),
-      rsf_cars(
-        model
-      )
-    `)
-    .eq('stage_id', stageId)
-    .order('position', { ascending: true });
-
-  if (error) {
-    throw new Error(`Erro ao buscar resultados da etapa: ${error.message}`);
-  }
-
-  return data || [];
 }

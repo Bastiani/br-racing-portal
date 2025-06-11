@@ -91,7 +91,7 @@ export default function FourFanResults() {
                 </h2>
                 <div className="flex items-center gap-2 mb-2">
                   <ReactCountryFlag
-                    countryCode={result.nationality}
+                    countryCode={result.nationality || 'BR'}
                     svg
                     style={{ width: "2em", height: "2em" }}
                     title={result.nationality}
@@ -135,7 +135,7 @@ export default function FourFanResults() {
                     </td>
                     <td className="px-6 py-4 flex items-center gap-2">
                       <ReactCountryFlag
-                        countryCode={result.nationality}
+                        countryCode={result.nationality || 'BR'}
                         svg
                         style={{
                           width: "1.5em",

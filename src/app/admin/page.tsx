@@ -1,6 +1,6 @@
 "use client";
 
-import { IconFlag, IconAward, IconMapPin } from "@tabler/icons-react";
+import { IconFlag, IconAward } from "@tabler/icons-react";
 import {
   getFourFanBrazilianResults,
   createRsfUser,
@@ -73,8 +73,8 @@ export default function AdminDashboard() {
         try {
           await createRsfUser({
             rsf_id: result.userid,
-            name: result.real_name || result.user_name,
-            nationality: result.nationality,
+            name: (result.real_name || result.user_name) ?? '',
+            nationality: result.nationality ?? '',
             victories: 0,
             first: 0,
             second: 0,

@@ -181,7 +181,7 @@ export default function ChampionshipImport({
       } else {
         setError(result.error || 'Erro ao importar CSV');
       }
-    } catch (error) {
+    } catch {
       setError('Erro ao processar arquivo. Tente novamente.');
     } finally {
       setIsLoading(false);

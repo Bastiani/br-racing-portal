@@ -9,7 +9,7 @@ import { getFourFanRallyById } from "@/lib/fourFanDB";
 
 // GET /api/rallies/[id]
 export async function GET(
-  request: NextRequest,
+  _: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = (await params) ?? {};

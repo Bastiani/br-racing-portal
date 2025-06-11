@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 // Primeiro, importe a nova função
 import { processStageResultsCSV, calculateAndInsertRallyResult, updateRallyPositionsAndPoints, updateChampionshipStandings, getPilotsByStageId } from '@/lib/championshipDB';
 import { parseCSV } from '@/utils/parseCSV';
@@ -29,6 +29,7 @@ export async function POST(request: Request) {
       .filter(line => line.trim())
       .map(line => {
         const values = line.split(';').map(v => v.trim().replace(/"/g, ''));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const obj: any = {};
         // Criar um objeto temporário no formato esperado pela função parseCSV
         const tempKey = headers.join(';');

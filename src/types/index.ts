@@ -149,7 +149,8 @@ export interface ButtonProps
   icon?: IconType;
 }
 
-export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {}
+// Remove the empty CardProps interface completely since it's equivalent to its supertype
+// export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 // ===== INTERNAL COMPONENT TYPES =====
 
@@ -175,7 +176,7 @@ export interface UseRsfOnlineRallyOptions {
 // ===== DATABASE TYPES =====
 
 export interface RsfUser {
-  id: number;
+  id: string;
   name: string;
   nationality: string;
 }
@@ -183,7 +184,9 @@ export interface RsfUser {
 // ===== FORM SPECIFIC TYPES =====
 
 export interface RallyFormProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSubmit: (data: any) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialData?: any;
   isLoading?: boolean;
 }
@@ -194,6 +197,7 @@ export interface RallyResultsProps {
 }
 
 export interface FourFanListProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[];
   isLoading: boolean;
 }
@@ -208,6 +212,7 @@ export interface Column {
 
 export interface BaseTableProps {
   columns: Column[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[];
   isLoading?: boolean;
 }

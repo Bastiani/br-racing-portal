@@ -59,10 +59,10 @@ export default function CustomChampionships() {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">
-            Campeonatos Customizados
+            Campeonatos BRC
           </h1>
           <p className="text-xl text-white/80">
-            Acompanhe os campeonatos de rally em andamento
+            Acompanhe os campeonatos em andamento
           </p>
         </div>
 
@@ -76,7 +76,7 @@ export default function CustomChampionships() {
             {championships.map((championship) => (
               <Link
                 key={championship.id}
-                href={`/custom-championships/${championship.id}`}
+                href={`/championships/${championship.id}`}
                 className="group"
               >
                 <div className="bg-gradient-to-br from-[#1B263B] to-[#0D1B2A] border border-white/10 rounded-lg p-6 hover:border-orange-500/50 transition-all duration-300 hover:scale-105">

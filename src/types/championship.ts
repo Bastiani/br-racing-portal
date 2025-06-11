@@ -115,6 +115,7 @@ export interface VRsfChampionshipCurrentStanding {
 export interface ChampionshipCreateInput {
   name: string;
   season: number;
+  status?: 'active' | 'finished' | 'cancelled';
   start_date?: Date;
   end_date?: Date;
 }
@@ -125,6 +126,7 @@ export interface RallyCreateInput {
   location?: string;
   rally_date: Date;
   rsf_rally: string;
+  status?: "scheduled" | "ongoing" | "finished" | "cancelled";
 }
 
 export interface StageResultInput {

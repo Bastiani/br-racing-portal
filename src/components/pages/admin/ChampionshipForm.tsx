@@ -49,8 +49,8 @@ export default function ChampionshipForm({ onChampionshipCreated }: Championship
         name: formData.name,
         season: parseInt(formData.season),
         status: formData.status,
-        start_date: formData.start_date || undefined,
-        end_date: formData.end_date || undefined
+        start_date: formData.start_date ? new Date(formData.start_date) : undefined,
+        end_date: formData.end_date ? new Date(formData.end_date) : undefined
       });
 
       setSuccess(`Campeonato "${championship.name}" criado com sucesso!`);

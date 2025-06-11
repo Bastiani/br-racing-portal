@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getChampionshipStandings } from '@/lib/championshipDB';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function GET(_: any, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const championshipId = parseInt(params.id);
+    const { id } = (await params) ?? {};
+    const championshipId = parseInt(id);
     
     if (isNaN(championshipId)) {
       return NextResponse.json({ error: 'ID do campeonato inválido' }, { status: 400 });

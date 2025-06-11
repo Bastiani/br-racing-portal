@@ -28,7 +28,6 @@ export function parseCSV(
       .split(";");
 
     // Cria um objeto com as propriedades corretas
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rowData: any = {};
     headers.forEach((header, index) => {
       rowData[header] = values[index];
