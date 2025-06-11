@@ -11,6 +11,7 @@ import {
   getStageResults
 } from '@/lib/championshipDB';
 import { RsfChampionship, RsfRally, RsfStage } from '@/types/championship';
+import { formatDatabaseDate } from '@/lib/utils';
 import Link from 'next/link';
 import { 
   IconTrophy, 
@@ -242,8 +243,8 @@ export default function ChampionshipDetails() {
               <div className="flex items-center text-white/60">
                 <IconCalendar size={16} className="mr-2" />
                 <span>
-                  {new Date(championship.start_date).toLocaleDateString('pt-BR')}
-                  {championship.end_date && ` - ${new Date(championship.end_date).toLocaleDateString('pt-BR')}`}
+                  {formatDatabaseDate(championship.start_date)}
+                  {championship.end_date && ` - ${formatDatabaseDate(championship.end_date)}`}
                 </span>
               </div>
             )}
@@ -301,7 +302,7 @@ export default function ChampionshipDetails() {
                       <div className="flex items-center text-white/60">
                         <IconCalendar size={14} className="mr-1" />
                         <span className="text-sm">
-                          {new Date(rally.rally_date).toLocaleDateString('pt-BR')}
+                          {formatDatabaseDate(rally.rally_date)}
                         </span>
                       </div>
                     </div>
@@ -309,11 +310,13 @@ export default function ChampionshipDetails() {
                     {/* Etapas do Rally */}
                     {expandedRally === rally.id && (
                       <div className="border-t border-white/10 p-4">
-                        <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
-                          <IconTarget size={18} className="mr-2 text-orange-400" />
-                          Etapa
-                        </h4>
-                        <Link href={`https://rallysimfans.hu/rbr/rally_online.php?centerbox=rally_list_details.php&rally_id=${rally.rsf_rally}`} target="_blank" rel="noopener noreferrer" className="mb-5">Link para o RSF: {rally.rsf_rally}</Link>
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-lg font-semibold text-white flex items-center">
+                            <IconTarget size={18} className="mr-2 text-orange-400" />
+                            Etapa
+                          </h4>
+                          <Link href={`https://rallysimfans.hu/rbr/rally_online.php?centerbox=rally_list_details.php&rally_id=${rally.rsf_rally}`} target="_blank" rel="noopener noreferrer" className="text-xs text-orange-400 hover:text-orange-300">RSF: {rally.rsf_rally}</Link>
+                        </div>
                         
                         {loadingStages ? (
                           <div className="text-center py-4">

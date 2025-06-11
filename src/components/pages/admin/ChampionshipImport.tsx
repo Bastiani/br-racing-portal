@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getAllChampionships, getRalliesByChampionship } from "@/lib/championshipDB";
+import { formatDatabaseDate } from "@/lib/utils";
 import { RsfChampionship, RsfRally } from "@/types/championship";
 
 interface ChampionshipImportProps {
@@ -240,7 +241,7 @@ export default function ChampionshipImport({
                 <SelectContent>
                   {rallies.map((rally) => (
                     <SelectItem key={rally.id} value={rally.id.toString()}>
-                      {rally.name} - {new Date(rally.rally_date).toLocaleDateString('pt-BR')}
+                      {rally.name} - {formatDatabaseDate(rally.rally_date)}
                     </SelectItem>
                   ))}
                 </SelectContent>

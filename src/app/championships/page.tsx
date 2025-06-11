@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Page from '@/components/pages/home/Page';
 import { getAllChampionships } from '@/lib/championshipDB';
 import { RsfChampionship } from '@/types/championship';
+import { formatDatabaseDate } from '@/lib/utils';
 import Link from 'next/link';
 import { IconTrophy, IconCalendar, IconFlag } from '@tabler/icons-react';
 
@@ -114,7 +115,10 @@ export default function CustomChampionships() {
                   
                   {championship.start_date && (
                     <div className="text-sm text-white/50">
-                      Início: {new Date(championship.start_date).toLocaleDateString('pt-BR')}
+                      <div className="flex items-center gap-1 mb-1">
+                        <IconCalendar size={14} />
+                        Início: {formatDatabaseDate(championship.start_date)}
+                      </div>
                     </div>
                   )}
                   
