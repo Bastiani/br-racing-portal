@@ -313,6 +313,7 @@ export default function ChampionshipDetails() {
                           <IconTarget size={18} className="mr-2 text-orange-400" />
                           Etapa
                         </h4>
+                        <Link href={`https://rallysimfans.hu/rbr/rally_online.php?centerbox=rally_list_details.php&rally_id=${rally.rsf_rally}`} target="_blank" rel="noopener noreferrer" className="mb-5">Link para o RSF: {rally.rsf_rally}</Link>
                         
                         {loadingStages ? (
                           <div className="text-center py-4">
@@ -331,7 +332,7 @@ export default function ChampionshipDetails() {
                                   <div className="flex items-center justify-between">
                                     <div className="flex items-center">
                                       <span className="text-orange-400 font-semibold mr-2">
-                                        RSF ID: <Link href={`https://rallysimfans.hu/rbr/rally_online.php?centerbox=rally_list_details.php&rally_id=${stage.stage_number}`}>{stage.stage_number}</Link>
+                                        Resultado
                                       </span>
                                       {/* <span className="text-white text-sm">{stage.stage_name}</span> */}
                                       {selectedStage === stage.id ? 

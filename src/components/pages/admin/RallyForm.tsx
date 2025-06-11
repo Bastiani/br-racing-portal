@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePickerField } from "@/components/ui/date-picker-field";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -74,11 +75,15 @@ export default function RallyForm({ onRallyCreated, preselectedChampionshipId }:
     setSuccess(null);
 
     try {
+      // Criar data local para evitar problemas de fuso horário
+      const [year, month, day] = formData.rally_date.split('-').map(Number);
+      const localDate = new Date(year, month - 1, day);
+      
       const rally = await createRally({
         championship_id: parseInt(formData.championship_id),
         name: formData.name,
         location: formData.location || undefined,
-        rally_date: new Date(formData.rally_date),
+        rally_date: localDate,
         rsf_rally: formData.rsf_rally,
         status: formData.status
       });
@@ -162,12 +167,12 @@ export default function RallyForm({ onRallyCreated, preselectedChampionshipId }:
               />
             </div>
             <div>
-              <Label htmlFor="rally_date">Data do Rally *</Label>
-              <Input
+              <DatePickerField
                 id="rally_date"
-                type="date"
+                label="Data do Rally"
                 value={formData.rally_date}
-                onChange={(e) => handleInputChange('rally_date', e.target.value)}
+                onChange={(value) => handleInputChange('rally_date', value)}
+                placeholder="Selecione a data do rally"
                 required
               />
             </div>

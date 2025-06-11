@@ -26,6 +26,7 @@ export interface RsfChampionship {
   status: "active" | "finished" | "cancelled";
   start_date?: Date;
   end_date?: Date;
+  image_url?: string;
   created_at: Date;
 }
 
@@ -118,6 +119,7 @@ export interface ChampionshipCreateInput {
   status?: 'active' | 'finished' | 'cancelled';
   start_date?: Date;
   end_date?: Date;
+  image_url?: string;
 }
 
 export interface RallyCreateInput {

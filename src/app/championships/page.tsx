@@ -79,7 +79,16 @@ export default function CustomChampionships() {
                 href={`/championships/${championship.id}`}
                 className="group"
               >
-                <div className="bg-gradient-to-br from-[#1B263B] to-[#0D1B2A] border border-white/10 rounded-lg p-6 hover:border-orange-500/50 transition-all duration-300 hover:scale-105">
+                <div className="relative bg-gradient-to-br from-[#1B263B] to-[#0D1B2A] border border-white/10 rounded-lg p-6 hover:border-orange-500/50 transition-all duration-300 hover:scale-105 overflow-hidden">
+                  {championship.image_url && (
+                    <div 
+                      className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+                      style={{
+                        backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.6) 100%), url(${championship.image_url})`
+                      }}
+                    />
+                  )}
+                  <div className="relative z-10">
                   <div className="flex items-center justify-between mb-4">
                     <IconTrophy className="text-orange-500" size={32} />
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -112,6 +121,7 @@ export default function CustomChampionships() {
                   <div className="mt-4 flex items-center text-orange-400 group-hover:text-orange-300 transition-colors">
                     <span className="text-sm font-medium">Ver detalhes</span>
                     <IconFlag size={16} className="ml-2" />
+                  </div>
                   </div>
                 </div>
               </Link>

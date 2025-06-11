@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { InputField } from '@/components/ui/InputField'
+import { DatePickerField } from '@/components/ui/date-picker-field'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createChampionship } from "@/lib/championshipDB";
+import { Label } from "@/components/ui/label";
 
 interface ChampionshipFormProps {
   onChampionshipCreated?: (championshipId: number) => void;
@@ -22,10 +23,12 @@ export default function ChampionshipForm({ onChampionshipCreated }: Championship
     season: new Date().getFullYear().toString(),
     status: 'active' as 'active' | 'finished' | 'cancelled',
     start_date: '',
-    end_date: ''
+    end_date: '',
+    image_url: ''
   });
 
   const handleInputChange = (field: string, value: string) => {
+    console.log('=========>>>> ', field, value)
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -45,12 +48,27 @@ export default function ChampionshipForm({ onChampionshipCreated }: Championship
     setSuccess(null);
 
     try {
+      // Criar datas locais para evitar problemas de fuso horário
+      let startDate: Date | undefined;
+      let endDate: Date | undefined;
+      
+      if (formData.start_date) {
+        const [year, month, day] = formData.start_date.split('-').map(Number);
+        startDate = new Date(year, month - 1, day);
+      }
+      
+      if (formData.end_date) {
+        const [year, month, day] = formData.end_date.split('-').map(Number);
+        endDate = new Date(year, month - 1, day);
+      }
+      
       const championship = await createChampionship({
         name: formData.name,
         season: parseInt(formData.season),
         status: formData.status,
-        start_date: formData.start_date ? new Date(formData.start_date) : undefined,
-        end_date: formData.end_date ? new Date(formData.end_date) : undefined
+        start_date: startDate,
+        end_date: endDate,
+        image_url: formData.image_url || undefined
       });
 
       setSuccess(`Campeonato "${championship.name}" criado com sucesso!`);
@@ -59,7 +77,8 @@ export default function ChampionshipForm({ onChampionshipCreated }: Championship
         season: new Date().getFullYear().toString(),
         status: 'active',
         start_date: '',
-        end_date: ''
+        end_date: '',
+        image_url: ''
       });
       
       onChampionshipCreated?.(championship.id);
@@ -81,9 +100,9 @@ export default function ChampionshipForm({ onChampionshipCreated }: Championship
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="name">Nome do Campeonato *</Label>
-            <Input
+            <InputField
               id="name"
+              label="Nome do Campeonato *"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
               placeholder="Ex: Campeonato Brasileiro de Rally 2024"
@@ -91,11 +110,21 @@ export default function ChampionshipForm({ onChampionshipCreated }: Championship
             />
           </div>
 
+          <div>
+            <InputField
+              id="image_url"
+              label="URL da Imagem"
+              value={formData.image_url}
+              onChange={(e) => handleInputChange('image_url', e.target.value)}
+              placeholder="https://exemplo.com/imagem.jpg"
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="season">Temporada *</Label>
-              <Input
+              <InputField
                 id="season"
+                label="Temporada *"
                 type="number"
                 value={formData.season}
                 onChange={(e) => handleInputChange('season', e.target.value)}
@@ -120,21 +149,21 @@ export default function ChampionshipForm({ onChampionshipCreated }: Championship
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="start_date">Data de Início</Label>
-              <Input
+              <DatePickerField
                 id="start_date"
-                type="date"
+                label="Data de Início"
                 value={formData.start_date}
-                onChange={(e) => handleInputChange('start_date', e.target.value)}
+                onChange={(value) => handleInputChange('start_date', value)}
+                placeholder="Selecione a data de início"
               />
             </div>
             <div>
-              <Label htmlFor="end_date">Data de Término</Label>
-              <Input
+              <DatePickerField
                 id="end_date"
-                type="date"
+                label="Data de Término"
                 value={formData.end_date}
-                onChange={(e) => handleInputChange('end_date', e.target.value)}
+                onChange={(value) => handleInputChange('end_date', value)}
+                placeholder="Selecione a data de término"
               />
             </div>
           </div>
