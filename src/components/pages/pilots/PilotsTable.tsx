@@ -40,8 +40,7 @@ export default async function PilotsTable() {
       : [];
 
   return (
-    <section className="my-12">
-      <h2 className="text-2xl text-white font-bold mb-4">Pilotos</h2>
+    <section>
       <div
         className="relative rounded-lg p-2 shadow-2xl"
         style={{

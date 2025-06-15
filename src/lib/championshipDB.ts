@@ -512,6 +512,65 @@ export async function getPilotsByStageId(stageId: number): Promise<number[]> {
   return uniquePilotIds;
 }
 
+// Interface para a view v_rsf_pilot_championships
+export interface PilotChampionshipData {
+  userid: number;
+  username: string;
+  real_name?: string;
+  nationality: string;
+  championship_id: number;
+  championship_name: string;
+  season: number;
+  status: string;
+  start_date?: string;
+  end_date?: string;
+  total_points: number;
+  rallies_completed: number;
+  wins: number;
+  podiums: number;
+  current_position?: number;
+  last_updated: string;
+}
+
+// Função para buscar dados da view v_rsf_pilot_championships
+export async function getPilotChampionships(pilotId?: number): Promise<PilotChampionshipData[]> {
+  const supabase = await getSupabaseClient();
+  
+  let query = supabase
+    .from('v_rsf_pilot_championships')
+    .select('*')
+    .order('season', { ascending: false })
+    .order('total_points', { ascending: false });
+
+  if (pilotId) {
+    query = query.eq('userid', pilotId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error(`Erro ao buscar campeonatos dos pilotos: ${error.message}`);
+  }
+
+  return data || [];
+}
+
+// Função para buscar todos os pilotos RSF
+export async function getAllRsfPilots(): Promise<RsfPilot[]> {
+  const supabase = await getSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('rsf_pilots')
+    .select('*')
+    .order('username', { ascending: true });
+
+  if (error) {
+    throw new Error(`Erro ao buscar pilotos RSF: ${error.message}`);
+  }
+
+  return data || [];
+}
+
 // Função para buscar etapas de um rally
 export async function getStagesByRally(rallyId: number): Promise<RsfStage[]> {
   const supabase = await getSupabaseClient();

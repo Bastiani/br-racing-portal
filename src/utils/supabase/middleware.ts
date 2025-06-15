@@ -37,17 +37,16 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Apenas proteger a área admin - outras páginas são públicas
   if (
     !user &&
     !request.nextUrl.pathname.startsWith('/auth') &&
-    !request.nextUrl.pathname.startsWith('/admin') &&
-    request.nextUrl.pathname !== '/' &&
-    request.nextUrl.pathname.startsWith('/championships') &&
-    request.nextUrl.pathname.startsWith('/pilots')
+    request.nextUrl.pathname.startsWith('/admin')
   ) {
-    // no user, potentially respond by redirecting the user to the login page
+    // Redirecionar usuários não autenticados para login quando tentam acessar admin
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
+    url.searchParams.set('redirectTo', request.nextUrl.pathname)
     return NextResponse.redirect(url)
   }
 
