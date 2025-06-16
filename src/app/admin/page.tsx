@@ -8,45 +8,65 @@ import {
 } from "@/lib/fourFanDB";
 import { useEffect, useState } from "react";
 import { RsfResult } from "@/types";
-import ChampionshipForm from "@/components/pages/admin/ChampionshipForm";
-import RallyForm from "@/components/pages/admin/RallyForm";
-import ChampionshipImport from "@/components/pages/admin/ChampionshipImport";
+import ChampionshipCreateForm from "@/components/forms/ChampionshipCreateForm";
+import ChampionshipEditForm from "@/components/forms/ChampionshipEditForm";
+import RallyCreateForm from "@/components/forms/RallyCreateForm";
+import ChampionshipImportForm from "@/components/forms/ChampionshipImportForm";
+import { getAllChampionships } from "@/lib/championshipDB";
+import { RsfChampionship } from "@/types/championship";
 import { Button } from "@/components/ui/button";
+import { AdminFormsProvider, useAdminForms } from "@/contexts/AdminFormsContext";
+import RallyForm from "@/components/pages/admin/RallyForm";
 
-export default function AdminDashboard() {
+function AdminDashboardContent() {
   const [brazilianResults, setBrazilianResults] = useState<RsfResult[]>([]);
   const [isCreatingUsers, setIsCreatingUsers] = useState(false);
   const [isUpdatingStats, setIsUpdatingStats] = useState(false);
   const [creationStatus, setCreationStatus] = useState<string>("");
   const [updateStatus, setUpdateStatus] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"dashboard" | "rallies" | "championship">(
+  const [activeTab, setActiveTab] = useState<"dashboard" | "rallies" | "championship" | "edit-championship">(
     "dashboard"
   );
-  const [selectedChampionshipId, setSelectedChampionshipId] = useState<number | undefined>();
-  const [selectedRallyId, setSelectedRallyId] = useState<number | undefined>();
-  const [currentStep, setCurrentStep] = useState<'championship' | 'rally' | 'import'>('championship');
+  const [championships, setChampionships] = useState<RsfChampionship[]>([]);
+  
+  // Usar o contexto para gerenciar estado dos formulários
+  const {
+    currentStep,
+    editingChampionshipId,
+    setEditingChampionshipId,
+    resetFlow,
+    goToImportExisting
+  } = useAdminForms();
 
-  const handleChampionshipCreated = (championshipId: number) => {
-    setSelectedChampionshipId(championshipId);
-    setCurrentStep('rally');
+  // As funções de callback agora são gerenciadas pelo contexto
+
+  // Função para carregar campeonatos
+  const loadChampionships = async () => {
+    try {
+      const data = await getAllChampionships();
+      setChampionships(data);
+    } catch (error) {
+      console.error('Erro ao carregar campeonatos:', error);
+    }
   };
 
-  const handleRallyCreated = (rallyId: number) => {
-    setSelectedRallyId(rallyId);
-    setCurrentStep('import');
+  // Função para iniciar edição de campeonato
+  const handleEditChampionship = (championshipId: number) => {
+    setEditingChampionshipId(championshipId);
+    setActiveTab('edit-championship');
   };
 
-  const resetFlow = () => {
-    setSelectedChampionshipId(undefined);
-    setSelectedRallyId(undefined);
-    setCurrentStep('championship');
+  // Função para cancelar edição
+  const handleCancelEdit = () => {
+    setEditingChampionshipId(undefined);
+    setActiveTab('championship');
   };
 
-  // Adicionar nova função para ir direto para importação
-  const goToImportExisting = () => {
-    setSelectedChampionshipId(undefined);
-    setSelectedRallyId(undefined);
-    setCurrentStep('import');
+  // Função para sucesso na edição
+  const handleEditSuccess = () => {
+    setEditingChampionshipId(undefined);
+    setActiveTab('championship');
+    loadChampionships(); // Recarregar lista
   };
 
   useEffect(() => {
@@ -60,7 +80,15 @@ export default function AdminDashboard() {
     };
 
     fetchResults();
+    loadChampionships();
   }, []);
+
+  // Carregar campeonatos quando a aba de campeonato for ativada
+  useEffect(() => {
+    if (activeTab === 'championship') {
+      loadChampionships();
+    }
+  }, [activeTab]);
 
   const handleCreateUsers = async () => {
     setIsCreatingUsers(true);
@@ -173,9 +201,31 @@ export default function AdminDashboard() {
         >
           Campeonato
         </button>
+        {editingChampionshipId && (
+          <button
+            onClick={() => setActiveTab("edit-championship")}
+            className={`pb-2 px-4 ${
+              activeTab === "edit-championship"
+                ? "border-b-2 border-blue-500 text-blue-600"
+                : "text-gray-600 hover:text-gray-800"
+            }`}
+          >
+            Editar Campeonato
+          </button>
+        )}
       </div>
 
       {/* Conteúdo das abas */}
+      {activeTab === "edit-championship" && editingChampionshipId && (
+        <div>
+          <ChampionshipEditForm 
+            championshipId={editingChampionshipId}
+            onSuccess={handleEditSuccess}
+            onCancel={handleCancelEdit}
+          />
+        </div>
+      )}
+
       {activeTab === "dashboard" && (
         <div>
           <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
@@ -285,8 +335,58 @@ export default function AdminDashboard() {
 
       {activeTab === "championship" && (
         <div>
+          <h1 className="text-2xl font-bold mb-6">Gerenciar Campeonato</h1>
+
+          {/* Lista de campeonatos existentes */}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-4">Campeonatos Existentes</h2>
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              {championships.length > 0 ? (
+                <div className="divide-y divide-gray-200">
+                  {championships.map((championship) => (
+                    <div key={championship.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900">{championship.name}</h3>
+                        <p className="text-sm text-gray-500">
+                          Temporada: {championship.season} | Status: 
+                          <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
+                            championship.status === 'active' ? 'bg-green-100 text-green-800' :
+                            championship.status === 'finished' ? 'bg-gray-100 text-gray-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {championship.status === 'active' ? 'Ativo' :
+                             championship.status === 'finished' ? 'Finalizado' : 'Cancelado'}
+                          </span>
+                        </p>
+                        {championship.start_date && (
+                          <p className="text-sm text-gray-500">
+                            Início: {new Date(championship.start_date).toLocaleDateString('pt-BR')}
+                            {championship.end_date && (
+                              <> | Fim: {new Date(championship.end_date).toLocaleDateString('pt-BR')}</>
+                            )}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleEditChampionship(championship.id)}
+                        className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        Editar
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center text-gray-500">
+                  Nenhum campeonato encontrado
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Botões de ação */}
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Gestão de Campeonato</h1>
+            <h2 className="text-xl font-bold">Gestão de Campeonato</h2>
             <div className="flex gap-2">
               <Button onClick={goToImportExisting} variant="outline">
                 Importar em Campeonato Existente
@@ -339,27 +439,26 @@ export default function AdminDashboard() {
 
           {/* Conteúdo baseado no step atual */}
           {currentStep === 'championship' && (
-            <ChampionshipForm onChampionshipCreated={handleChampionshipCreated} />
+            <ChampionshipCreateForm />
           )}
 
           {currentStep === 'rally' && (
-            <RallyForm 
-              onRallyCreated={handleRallyCreated} 
-              preselectedChampionshipId={selectedChampionshipId}
-            />
+            <RallyCreateForm />
           )}
 
           {currentStep === 'import' && (
-            <ChampionshipImport 
-              onImportComplete={() => {
-                console.log('Import completed successfully!');
-              }}
-              preselectedChampionshipId={selectedChampionshipId}
-              preselectedRallyId={selectedRallyId}
-            />
+            <ChampionshipImportForm />
           )}
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminDashboard() {
+  return (
+    <AdminFormsProvider>
+      <AdminDashboardContent />
+    </AdminFormsProvider>
   );
 }

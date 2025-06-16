@@ -1,10 +1,6 @@
 import Link from "next/link";
 import {
   IconHome,
-  IconFileText,
-  IconSettings,
-  IconFlag,
-  IconFileUpload,
 } from "@tabler/icons-react";
 
 type SidebarItemProps = {
@@ -40,26 +36,6 @@ export default function Sidebar() {
             icon={<IconHome size={20} />}
             text="Dashboard"
             href="/admin"
-          />
-          <SidebarItem
-            icon={<IconFlag size={20} />}
-            text="Rallies"
-            href="/admin/rallies"
-          />
-          <SidebarItem
-            icon={<IconFileText size={20} />}
-            text="Relatórios"
-            href="/admin/reports"
-          />
-          <SidebarItem
-            icon={<IconSettings size={20} />}
-            text="Configurações"
-            href="/admin/settings"
-          />
-          <SidebarItem
-            icon={<IconFileUpload size={20} />}
-            text="Upload CSV"
-            href="/admin/csv-upload"
           />
         </nav>
       </div>

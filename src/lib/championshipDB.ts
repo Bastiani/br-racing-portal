@@ -73,6 +73,24 @@ export async function createChampionship(championshipData: ChampionshipCreateInp
   return data;
 }
 
+// Função para atualizar campeonato
+export async function updateChampionship(id: number, championshipData: Partial<ChampionshipCreateInput>): Promise<RsfChampionship> {
+  const supabase = await getSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('rsf_championships')
+    .update(championshipData)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Erro ao atualizar campeonato: ${error.message}`);
+  }
+
+  return data;
+}
+
 // Função para criar rally
 export async function createRally(rallyData: RallyCreateInput): Promise<RsfRally> {
   const supabase = await getSupabaseClient();
