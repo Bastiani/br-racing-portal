@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { InputField } from '@/components/ui/InputField'
 import { DatePickerField } from '@/components/ui/date-picker-field'
@@ -37,12 +37,7 @@ export default function RallyEditForm({ rallyId, onSuccess, onCancel }: RallyEdi
   const [loadingData, setLoadingData] = useState(true);
   const [isLoadingChampionships, setIsLoadingChampionships] = useState(false);
 
-  useEffect(() => {
-    loadRallyData();
-    loadChampionships();
-  }, [rallyId]);
-
-  const loadChampionships = async () => {
+  const loadChampionships = useCallback(async () => {
     try {
       setIsLoadingChampionships(true);
       const data = await getAllChampionships();
@@ -53,9 +48,9 @@ export default function RallyEditForm({ rallyId, onSuccess, onCancel }: RallyEdi
     } finally {
       setIsLoadingChampionships(false);
     }
-  };
+  }, [setError]);
 
-  const loadRallyData = async () => {
+  const loadRallyData = useCallback(async () => {
     try {
       setLoadingData(true);
       const rally = await getRallyById(rallyId);
@@ -75,7 +70,12 @@ export default function RallyEditForm({ rallyId, onSuccess, onCancel }: RallyEdi
     } finally {
       setLoadingData(false);
     }
-  };
+  }, [rallyId, setError]);
+
+  useEffect(() => {
+    loadRallyData();
+    loadChampionships();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,9 +91,8 @@ export default function RallyEditForm({ rallyId, onSuccess, onCancel }: RallyEdi
 
     try {
       // Criar data local para evitar problemas de fuso horário
-      let rallyDate: Date;
       const [year, month, day] = formData.rally_date.split('-').map(Number);
-      rallyDate = new Date(year, month - 1, day);
+      const rallyDate = new Date(year, month - 1, day);
       
       // Importar e usar a função updateRally
       const { updateRally } = await import('@/lib/championshipDB');

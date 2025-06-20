@@ -30,10 +30,6 @@ export default function ChampionshipEditForm({ championshipId, onSuccess, onCanc
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadChampionshipData();
-  }, [championshipId]);
-
   const loadChampionshipData = async () => {
     try {
       setLoadingData(true);
@@ -55,6 +51,10 @@ export default function ChampionshipEditForm({ championshipId, onSuccess, onCanc
       setLoadingData(false);
     }
   };
+
+  useEffect(() => {
+    loadChampionshipData();
+  }, [championshipId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

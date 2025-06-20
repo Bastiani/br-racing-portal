@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,6 +42,36 @@ export default function ChampionshipImportForm({
 
   const [file, setFile] = useState<File | null>(null);
 
+  const loadChampionships = useCallback(async () => {
+    try {
+      setIsLoadingChampionships(true);
+      const data = await getAllChampionships();
+      setChampionships(data);
+    } catch (error) {
+      setError(`Erro ao carregar campeonatos: ${error}`);
+    } finally {
+      setIsLoadingChampionships(false);
+    }
+  }, [setIsLoadingChampionships, setChampionships, setError]);
+
+  const loadRallies = useCallback(async (championshipId: number) => {
+    try {
+      const data = await getRalliesByChampionship(championshipId);
+      setRallies(data);
+    } catch (error) {
+      setError(`Erro ao carregar rallies: ${error}`);
+    }
+  }, [setRallies, setError]);
+
+  useEffect(() => {
+    if (preselectedChampionshipId) {
+      updateImportFormData('championshipId', preselectedChampionshipId.toString());
+    }
+    if (preselectedRallyId) {
+      updateImportFormData('rallyId', preselectedRallyId.toString());
+    }
+  }, [preselectedChampionshipId, preselectedRallyId]);
+
   useEffect(() => {
     loadChampionships();
   }, []);
@@ -54,36 +84,6 @@ export default function ChampionshipImportForm({
       updateImportFormData('rallyId', '');
     }
   }, [importFormData.championshipId]);
-
-  useEffect(() => {
-    if (preselectedChampionshipId) {
-      updateImportFormData('championshipId', preselectedChampionshipId.toString());
-    }
-    if (preselectedRallyId) {
-      updateImportFormData('rallyId', preselectedRallyId.toString());
-    }
-  }, [preselectedChampionshipId, preselectedRallyId]);
-
-  const loadChampionships = async () => {
-    try {
-      setIsLoadingChampionships(true);
-      const data = await getAllChampionships();
-      setChampionships(data);
-    } catch (error) {
-      setError(`Erro ao carregar campeonatos: ${error}`);
-    } finally {
-      setIsLoadingChampionships(false);
-    }
-  };
-
-  const loadRallies = async (championshipId: number) => {
-    try {
-      const data = await getRalliesByChampionship(championshipId);
-      setRallies(data);
-    } catch (error) {
-      setError(`Erro ao carregar rallies: ${error}`);
-    }
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];

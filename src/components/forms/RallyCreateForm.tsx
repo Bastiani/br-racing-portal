@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,17 +35,7 @@ export default function RallyCreateForm({ onRallyCreated, preselectedChampionshi
     setSuccess
   } = useAdminForms();
 
-  useEffect(() => {
-    loadChampionships();
-  }, []);
-
-  useEffect(() => {
-    if (preselectedChampionshipId) {
-      updateRallyFormData('championship_id', preselectedChampionshipId.toString());
-    }
-  }, [preselectedChampionshipId]);
-
-  const loadChampionships = async () => {
+  const loadChampionships = useCallback(async () => {
     try {
       setIsLoadingChampionships(true);
       const data = await getAllChampionships();
@@ -55,7 +45,17 @@ export default function RallyCreateForm({ onRallyCreated, preselectedChampionshi
     } finally {
       setIsLoadingChampionships(false);
     }
-  };
+  }, [setIsLoadingChampionships, setChampionships, setError]);
+
+  useEffect(() => {
+    if (preselectedChampionshipId) {
+      updateRallyFormData('championship_id', preselectedChampionshipId.toString());
+    }
+  }, [preselectedChampionshipId]);
+
+  useEffect(() => {
+    loadChampionships();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

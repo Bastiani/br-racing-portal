@@ -36,10 +36,6 @@ export default function ChampionshipEditForm({ championshipId, onSuccess, onCanc
   const [isLoading, setIsLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
-  useEffect(() => {
-    loadChampionshipData();
-  }, [championshipId]);
-
   const loadChampionshipData = async () => {
     try {
       setLoadingData(true);
@@ -117,6 +113,10 @@ export default function ChampionshipEditForm({ championshipId, onSuccess, onCanc
       [field]: value
     }));
   };
+
+  useEffect(() => {
+    loadChampionshipData();
+  }, []);
 
   if (loadingData) {
     return (
