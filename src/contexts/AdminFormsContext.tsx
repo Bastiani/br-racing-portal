@@ -39,6 +39,7 @@ interface AdminFormsState {
   selectedRallyId?: number;
   currentStep: 'championship' | 'rally' | 'import';
   editingChampionshipId?: number;
+  editingRallyId?: number;
   
   // Loading States
   isLoading: boolean;
@@ -70,6 +71,7 @@ interface AdminFormsActions {
   setSelectedRallyId: (id?: number) => void;
   setCurrentStep: (step: 'championship' | 'rally' | 'import') => void;
   setEditingChampionshipId: (id?: number) => void;
+  setEditingRallyId: (id?: number) => void;
   
   // Loading Actions
   setIsLoading: (loading: boolean) => void;
@@ -124,7 +126,8 @@ export function AdminFormsProvider({ children }: AdminFormsProviderProps) {
     isLoadingChampionships: false,
     isLoadingRallies: false,
     error: null,
-    success: null
+    success: null,
+    editingRallyId: undefined
   });
 
   const updateChampionshipFormData = (field: string, value: string) => {
@@ -239,6 +242,10 @@ export function AdminFormsProvider({ children }: AdminFormsProviderProps) {
     setState(prev => ({ ...prev, editingChampionshipId: id }));
   };
 
+  const setEditingRallyId = (id?: number) => {
+    setState(prev => ({ ...prev, editingRallyId: id }));
+  };
+
   const setIsLoading = (loading: boolean) => {
     setState(prev => ({ ...prev, isLoading: loading }));
   };
@@ -311,6 +318,7 @@ export function AdminFormsProvider({ children }: AdminFormsProviderProps) {
     setSelectedRallyId,
     setCurrentStep,
     setEditingChampionshipId,
+    setEditingRallyId,
     setIsLoading,
     setIsLoadingChampionships,
     setIsLoadingRallies,

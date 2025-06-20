@@ -476,6 +476,29 @@ export async function getRalliesByChampionship(championshipId: number): Promise<
   return data || [];
 }
 
+// Função para buscar todos os rallies
+export async function getAllRallies(): Promise<RsfRally[]> {
+  const supabase = await getSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('rsf_rallies')
+    .select(`
+      *,
+      rsf_championships!inner(
+        id,
+        name,
+        season
+      )
+    `)
+    .order('rally_date', { ascending: false });
+
+  if (error) {
+    throw new Error(`Erro ao buscar rallies: ${error.message}`);
+  }
+
+  return data || [];
+}
+
 // Função para buscar um campeonato por ID
 export async function getChampionshipById(id: number): Promise<RsfChampionship | null> {
   const supabase = await getSupabaseClient();
@@ -507,6 +530,24 @@ export async function getRallyById(id: number): Promise<RsfRally | null> {
   if (error) {
     if (error.code === 'PGRST116') return null; // Not found
     throw new Error(`Erro ao buscar rally: ${error.message}`);
+  }
+
+  return data;
+}
+
+// Função para atualizar rally
+export async function updateRally(id: number, rallyData: Partial<RallyCreateInput>): Promise<RsfRally> {
+  const supabase = await getSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('rsf_rallies')
+    .update(rallyData)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Erro ao atualizar rally: ${error.message}`);
   }
 
   return data;

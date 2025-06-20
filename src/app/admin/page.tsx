@@ -11,12 +11,15 @@ import { RsfResult } from "@/types";
 import ChampionshipCreateForm from "@/components/forms/ChampionshipCreateForm";
 import ChampionshipEditForm from "@/components/forms/ChampionshipEditForm";
 import RallyCreateForm from "@/components/forms/RallyCreateForm";
+import RallyEditForm from "@/components/forms/RallyEditForm";
 import ChampionshipImportForm from "@/components/forms/ChampionshipImportForm";
-import { getAllChampionships } from "@/lib/championshipDB";
-import { RsfChampionship } from "@/types/championship";
+import { getAllChampionships, getAllRallies } from "@/lib/championshipDB";
+import { RsfChampionship, RsfRally } from "@/types/championship";
 import { Button } from "@/components/ui/button";
 import { AdminFormsProvider, useAdminForms } from "@/contexts/AdminFormsContext";
 import RallyForm from "@/components/pages/admin/RallyForm";
+import ChampionshipsTable from "@/components/admin/ChampionshipsTable";
+import RalliesTable from "@/components/admin/RalliesTable";
 
 function AdminDashboardContent() {
   const [brazilianResults, setBrazilianResults] = useState<RsfResult[]>([]);
@@ -24,16 +27,19 @@ function AdminDashboardContent() {
   const [isUpdatingStats, setIsUpdatingStats] = useState(false);
   const [creationStatus, setCreationStatus] = useState<string>("");
   const [updateStatus, setUpdateStatus] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"dashboard" | "rallies" | "championship" | "edit-championship">(
+  const [activeTab, setActiveTab] = useState<"dashboard" | "rallies" | "championship" | "edit-championship" | "edit-rally">(
     "dashboard"
   );
   const [championships, setChampionships] = useState<RsfChampionship[]>([]);
+  const [rallies, setRallies] = useState<RsfRally[]>([]);
   
   // Usar o contexto para gerenciar estado dos formulários
   const {
     currentStep,
     editingChampionshipId,
     setEditingChampionshipId,
+    editingRallyId,
+    setEditingRallyId,
     resetFlow,
     goToImportExisting
   } = useAdminForms();
@@ -47,6 +53,16 @@ function AdminDashboardContent() {
       setChampionships(data);
     } catch (error) {
       console.error('Erro ao carregar campeonatos:', error);
+    }
+  };
+
+  // Função para carregar rallies
+  const loadRallies = async () => {
+    try {
+      const data = await getAllRallies();
+      setRallies(data);
+    } catch (error) {
+      console.error('Erro ao carregar rallies:', error);
     }
   };
 
@@ -69,6 +85,25 @@ function AdminDashboardContent() {
     loadChampionships(); // Recarregar lista
   };
 
+  // Função para iniciar edição de rally
+  const handleEditRally = (rallyId: number) => {
+    setEditingRallyId(rallyId);
+    setActiveTab('edit-rally');
+  };
+
+  // Função para cancelar edição de rally
+  const handleCancelRallyEdit = () => {
+    setEditingRallyId(undefined);
+    setActiveTab('rallies');
+  };
+
+  // Função para sucesso na edição de rally
+  const handleRallyEditSuccess = () => {
+    setEditingRallyId(undefined);
+    setActiveTab('rallies');
+    loadRallies(); // Recarregar lista
+  };
+
   useEffect(() => {
     const fetchResults = async () => {
       try {
@@ -81,6 +116,7 @@ function AdminDashboardContent() {
 
     fetchResults();
     loadChampionships();
+    loadRallies();
   }, []);
 
   // Carregar campeonatos quando a aba de campeonato for ativada
@@ -213,6 +249,18 @@ function AdminDashboardContent() {
             Editar Campeonato
           </button>
         )}
+        {editingRallyId && (
+          <button
+            onClick={() => setActiveTab("edit-rally")}
+            className={`pb-2 px-4 ${
+              activeTab === "edit-rally"
+                ? "border-b-2 border-blue-500 text-blue-600"
+                : "text-gray-600 hover:text-gray-800"
+            }`}
+          >
+            Editar Rally
+          </button>
+        )}
       </div>
 
       {/* Conteúdo das abas */}
@@ -222,6 +270,16 @@ function AdminDashboardContent() {
             championshipId={editingChampionshipId}
             onSuccess={handleEditSuccess}
             onCancel={handleCancelEdit}
+          />
+        </div>
+      )}
+
+      {activeTab === "edit-rally" && editingRallyId && (
+        <div>
+          <RallyEditForm 
+            rallyId={editingRallyId}
+            onSuccess={handleRallyEditSuccess}
+            onCancel={handleCancelRallyEdit}
           />
         </div>
       )}
@@ -329,6 +387,15 @@ function AdminDashboardContent() {
       {activeTab === "rallies" && (
         <div>
           <h1 className="text-2xl font-bold mb-6">Gerenciar Rallies</h1>
+          
+          {/* Tabela de rallies existentes */}
+          <div className="mb-8">
+            <RalliesTable 
+              rallies={rallies}
+              onEdit={handleEditRally}
+            />
+          </div>
+          
           <RallyForm />
         </div>
       )}
@@ -337,51 +404,12 @@ function AdminDashboardContent() {
         <div>
           <h1 className="text-2xl font-bold mb-6">Gerenciar Campeonato</h1>
 
-          {/* Lista de campeonatos existentes */}
+          {/* Tabela de campeonatos existentes */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4">Campeonatos Existentes</h2>
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              {championships.length > 0 ? (
-                <div className="divide-y divide-gray-200">
-                  {championships.map((championship) => (
-                    <div key={championship.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{championship.name}</h3>
-                        <p className="text-sm text-gray-500">
-                          Temporada: {championship.season} | Status: 
-                          <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
-                            championship.status === 'active' ? 'bg-green-100 text-green-800' :
-                            championship.status === 'finished' ? 'bg-gray-100 text-gray-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {championship.status === 'active' ? 'Ativo' :
-                             championship.status === 'finished' ? 'Finalizado' : 'Cancelado'}
-                          </span>
-                        </p>
-                        {championship.start_date && (
-                          <p className="text-sm text-gray-500">
-                            Início: {new Date(championship.start_date).toLocaleDateString('pt-BR')}
-                            {championship.end_date && (
-                              <> | Fim: {new Date(championship.end_date).toLocaleDateString('pt-BR')}</>
-                            )}
-                          </p>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => handleEditChampionship(championship.id)}
-                        className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        Editar
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 text-center text-gray-500">
-                  Nenhum campeonato encontrado
-                </div>
-              )}
-            </div>
+            <ChampionshipsTable 
+              championships={championships}
+              onEdit={handleEditChampionship}
+            />
           </div>
 
           {/* Botões de ação */}
