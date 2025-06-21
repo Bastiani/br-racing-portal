@@ -50,6 +50,18 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Verificar se o usuário autenticado tem permissão para acessar admin
+  if (
+    user &&
+    user.email !== 'rafacdb@gmail.com' &&
+    request.nextUrl.pathname.startsWith('/admin')
+  ) {
+    // Redirecionar usuários não autorizados para página de acesso negado
+    const url = request.nextUrl.clone()
+    url.pathname = '/auth/unauthorized'
+    return NextResponse.redirect(url)
+  }
+
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:

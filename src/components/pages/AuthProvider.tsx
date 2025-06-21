@@ -22,6 +22,13 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         return;
       }
       
+      // Verificar se o email é o autorizado
+      if (session.user.email !== 'rafacdb@gmail.com') {
+        await supabase.auth.signOut();
+        router.push('/auth/unauthorized');
+        return;
+      }
+      
       setIsLoading(false);
     };
 
@@ -29,9 +36,16 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     checkSession();
 
     // Configurar listener para mudanu00e7as na autenticau00e7u00e3o
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT') {
         router.push('/auth/login');
+      } else if (event === 'SIGNED_IN' && session) {
+        // Verificar se o email é o autorizado quando fizer login
+        if (session.user.email !== 'rafacdb@gmail.com') {
+          await supabase.auth.signOut();
+          router.push('/auth/unauthorized');
+          return;
+        }
       }
     });
 
