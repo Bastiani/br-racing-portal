@@ -2,6 +2,30 @@ import Page from "@/components/pages/home/Page";
 import PilotsTable from "../../components/pages/pilots/PilotsTable";
 import RsfPilotsTable from "../../components/pages/pilots/RsfPilotsTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Ranking de Pilotos",
+  description: "Confira o ranking completo dos pilotos do Brasil Rally Championship. Estatísticas detalhadas dos pilotos FourFan e dos campeonatos oficiais.",
+  keywords: [
+    "ranking pilotos",
+    "pilotos rally",
+    "estatísticas pilotos",
+    "fourfan pilotos",
+    "campeonato pilotos",
+    "brasil rally pilotos",
+    "classificação pilotos"
+  ],
+  openGraph: {
+    title: "Ranking de Pilotos | Brasil Rally Championship",
+    description: "Confira o ranking completo dos pilotos do Brasil Rally Championship. Estatísticas detalhadas dos pilotos FourFan e dos campeonatos oficiais.",
+    url: "/pilots",
+  },
+  twitter: {
+    title: "Ranking de Pilotos | Brasil Rally Championship",
+    description: "Confira o ranking completo dos pilotos do Brasil Rally Championship.",
+  },
+};
 
 export default function Pilotos() {
   return (

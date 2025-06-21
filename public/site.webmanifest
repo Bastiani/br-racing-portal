@@ -1,0 +1,40 @@
+{
+  "name": "Brasil Rally Championship",
+  "short_name": "BR Rally",
+  "description": "Club voltado para campeonatos de rally, tanto em simuladores como simcade",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1B263B",
+  "theme_color": "#ff6b00",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["sports", "entertainment", "games"],
+  "lang": "pt-BR",
+  "scope": "/"
+}
