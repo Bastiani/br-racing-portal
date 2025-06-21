@@ -8,11 +8,11 @@ import {
 } from "@/lib/fourFanDB";
 import { useEffect, useState } from "react";
 import { RsfResult } from "@/types";
-import ChampionshipCreateForm from "@/components/forms/ChampionshipCreateForm";
-import ChampionshipEditForm from "@/components/forms/ChampionshipEditForm";
-import RallyCreateForm from "@/components/forms/RallyCreateForm";
-import RallyEditForm from "@/components/forms/RallyEditForm";
-import ChampionshipImportForm from "@/components/forms/ChampionshipImportForm";
+import ChampionshipCreateForm from "@/components/forms/ChampionshipCreateFormRHF";
+import ChampionshipEditForm from "@/components/forms/ChampionshipEditFormRHF";
+import RallyCreateForm from "@/components/forms/RallyCreateFormRHF";
+import RallyEditForm from "@/components/forms/RallyEditFormRHF";
+import ChampionshipImportForm from "@/components/forms/ChampionshipImportFormRHF";
 import { getAllChampionships, getAllRallies } from "@/lib/championshipDB";
 import { RsfChampionship, RsfRally } from "@/types/championship";
 import { Button } from "@/components/ui/button";
