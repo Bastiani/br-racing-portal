@@ -7,7 +7,7 @@ import { FormDatePickerField } from '@/components/ui/FormDatePickerField'
 import { FormSelectField } from '@/components/ui/FormSelectField'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormField } from "@/components/ui/form"
-import { User, Mail, Calendar } from "lucide-react"
+import { User, Mail } from "lucide-react"
 
 // Schema de validação com Zod
 const exampleSchema = z.object({

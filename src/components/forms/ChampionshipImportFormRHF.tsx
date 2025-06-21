@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react"
-import { useForm } from "react-hook-form"
+import { useEffect, useCallback } from "react"
+import { Resolver, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
@@ -55,7 +55,7 @@ export default function ChampionshipImportFormRHF({
   } = useAdminForms()
 
   const form = useForm<ImportFormData>({
-    resolver: zodResolver(importSchema),
+    resolver: zodResolver(importSchema) as Resolver<ImportFormData>,
     defaultValues: {
       championshipId: preselectedChampionshipId?.toString() || "",
       rallyId: preselectedRallyId?.toString() || "",
@@ -232,23 +232,26 @@ export default function ChampionshipImportFormRHF({
             <FormField
               control={form.control}
               name="file"
-              render={({ field: { onChange, value, ...field } }) => (
-                <FormItem>
-                  <FormLabel>Arquivo CSV *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept=".csv,text/csv"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        onChange(file)
-                      }}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field: { onChange, ...field } }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Arquivo CSV *</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value="" // Reset value to empty string to avoid type error with File object
+                        type="file"
+                        accept=".csv,text/csv"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          onChange(file)
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )
+              }}
             />
 
             <div className="bg-muted p-4 rounded-lg">
