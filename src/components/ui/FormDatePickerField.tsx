@@ -1,7 +1,6 @@
 import * as React from "react"
 import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { DatePicker } from "@/components/ui/date-picker"
-import { cn } from "@/lib/utils"
 
 interface FormDatePickerFieldProps {
   label: string
