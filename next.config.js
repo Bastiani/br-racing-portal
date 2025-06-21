@@ -54,22 +54,8 @@ const nextConfig = {
     ]
   },
   
-  // Redirect www to non-www for SEO
-  async redirects() {
-    return [
-      {
-        source: '/:path*',
-        has: [
-          {
-            type: 'host',
-            value: 'www.brasilrallychampionship.com.br',
-          },
-        ],
-        destination: 'https://brasilrallychampionship.com.br/:path*',
-        permanent: true,
-      },
-    ]
-  },
+  // Redirect configuration removed to prevent infinite loops
+  // Configure redirects at DNS/hosting level instead,
 };
 
 module.exports = nextConfig;
