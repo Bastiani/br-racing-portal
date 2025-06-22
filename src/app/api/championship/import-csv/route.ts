@@ -11,6 +11,7 @@ export async function POST(request: Request) {
     const rallyId = parseInt(formData.get('rallyId') as string);
     const stageName = formData.get('stageName') as string;
     const stageNumber = parseInt(formData.get('stageNumber') as string);
+    const categoryId = parseInt(formData.get('categoryId') as string);
 
     if (!file) {
       return NextResponse.json({ error: 'Arquivo não fornecido' }, { status: 400 });
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
       
       for (const pilotId of validPilotIds) {
         try {
-          await calculateAndInsertRallyResult(rallyId, pilotId);
+          await calculateAndInsertRallyResult(rallyId, pilotId, categoryId);
         } catch (error) {
           console.error(`Erro ao calcular resultado do piloto ${pilotId}:`, error);
         }

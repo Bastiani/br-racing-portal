@@ -10,12 +10,21 @@ export interface RsfPilot {
   created_at: Date;
 }
 
+// Tabela de categorias de carros
+export interface RsfCarCategory {
+  id: number;
+  name: string;
+  description?: string;
+  created_at: Date;
+}
+
 // Tabela de veículos/carros
 export interface RsfCar {
   id: number;
   model: string;
   category: string;
   created_at: Date;
+  category_id?: number;
 }
 
 // Tabela de campeonatos

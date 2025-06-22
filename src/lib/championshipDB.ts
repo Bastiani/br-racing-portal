@@ -176,7 +176,7 @@ export async function getWrcPoints(position: number): Promise<number> {
 }
 
 // Função para calcular e inserir resultado geral do rally
-export async function calculateAndInsertRallyResult(rallyId: number, pilotId: number): Promise<RsfRallyResult> {
+export async function calculateAndInsertRallyResult(rallyId: number, pilotId: number, categoryId?: number): Promise<RsfRallyResult> {
   const supabase = await getSupabaseClient();
   
   // Buscar todos os resultados de etapas do piloto neste rally
@@ -203,15 +203,22 @@ export async function calculateAndInsertRallyResult(rallyId: number, pilotId: nu
 
   if (hasDnf || hasDsq) {
     // Se DNF ou DSQ, não pontua
+    const insertData = {
+      rally_id: rallyId,
+      pilot_id: pilotId,
+      overall_position: 999, // Posição alta para DNF/DSQ
+      total_time: '99:59:59',
+      points_earned: 0,
+      category_id: 8
+    };
+    
+    if (categoryId) {
+      insertData.category_id = categoryId;
+    }
+    
     const { data, error } = await supabase
       .from('rsf_rally_points')
-      .insert({
-        rally_id: rallyId,
-        pilot_id: pilotId,
-        overall_position: 999, // Posição alta para DNF/DSQ
-        total_time: '99:59:59',
-        points_earned: 0
-      })
+      .insert(insertData)
       .select()
       .single();
 
@@ -241,15 +248,22 @@ export async function calculateAndInsertRallyResult(rallyId: number, pilotId: nu
 
   // Buscar posição geral (precisa calcular depois de todos os pilotos)
   // Por enquanto, vamos inserir com posição 0 e atualizar depois
+  const upsertData = {
+    rally_id: rallyId,
+    pilot_id: pilotId,
+    overall_position: 0, // Será atualizado depois
+    total_time: totalTime,
+    points_earned: 0, // Será calculado depois
+    category_id: 8
+  };
+  
+  if (categoryId) {
+    upsertData.category_id = categoryId;
+  }
+  
   const { data, error } = await supabase
     .from('rsf_rally_points')
-    .upsert({
-      rally_id: rallyId,
-      pilot_id: pilotId,
-      overall_position: 0, // Será atualizado depois
-      total_time: totalTime,
-      points_earned: 0 // Será calculado depois
-    }, {
+    .upsert(upsertData, {
       onConflict: 'rally_id,pilot_id'
     })
     .select()
@@ -282,12 +296,14 @@ export async function updateRallyPositionsAndPoints(rallyId: number): Promise<vo
     const position = i + 1;
     const points = await getWrcPoints(position);
 
+    const updateData = {
+      overall_position: position,
+      points_earned: points
+    };
+
     const { error: updateError } = await supabase
       .from('rsf_rally_points')
-      .update({
-        overall_position: position,
-        points_earned: points
-      })
+      .update(updateData)
       .eq('id', results[i].id);
 
     if (updateError) {

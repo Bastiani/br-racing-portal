@@ -20,6 +20,11 @@ import { AdminFormsProvider, useAdminForms } from "@/contexts/AdminFormsContext"
 import RallyForm from "@/components/pages/admin/RallyForm";
 import ChampionshipsTable from "@/components/admin/ChampionshipsTable";
 import RalliesTable from "@/components/admin/RalliesTable";
+import { CarCategoriesTable } from "@/components/admin/CarCategoriesTable";
+import CarCategoryCreateFormRHF from "@/components/forms/CarCategoryCreateFormRHF";
+import CarCategoryEditFormRHF from "@/components/forms/CarCategoryEditFormRHF";
+import { getCarCategories } from "@/lib/carCategoryDB";
+import { RsfCarCategory } from "@/types/championship";
 
 function AdminDashboardContent() {
   const [brazilianResults, setBrazilianResults] = useState<RsfResult[]>([]);
@@ -27,11 +32,13 @@ function AdminDashboardContent() {
   const [isUpdatingStats, setIsUpdatingStats] = useState(false);
   const [creationStatus, setCreationStatus] = useState<string>("");
   const [updateStatus, setUpdateStatus] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"dashboard" | "rallies" | "championship" | "edit-championship" | "edit-rally">(
+  const [activeTab, setActiveTab] = useState<"dashboard" | "rallies" | "championship" | "categories" | "edit-championship" | "edit-rally" | "edit-category">(
     "dashboard"
   );
   const [championships, setChampionships] = useState<RsfChampionship[]>([]);
   const [rallies, setRallies] = useState<RsfRally[]>([]);
+  const [categories, setCategories] = useState<RsfCarCategory[]>([]);
+  const [editingCategoryId, setEditingCategoryId] = useState<number | undefined>();
   
   // Usar o contexto para gerenciar estado dos formulários
   const {
@@ -63,6 +70,16 @@ function AdminDashboardContent() {
       setRallies(data);
     } catch (error) {
       console.error('Erro ao carregar rallies:', error);
+    }
+  };
+
+  // Função para carregar categorias
+  const loadCategories = async () => {
+    try {
+      const data = await getCarCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error('Erro ao carregar categorias:', error);
     }
   };
 
@@ -104,6 +121,35 @@ function AdminDashboardContent() {
     loadRallies(); // Recarregar lista
   };
 
+  // Função para iniciar edição de categoria
+  const handleEditCategory = (categoryId: number) => {
+    setEditingCategoryId(categoryId);
+    setActiveTab('edit-category');
+  };
+
+  // Função para cancelar edição de categoria
+  const handleCancelCategoryEdit = () => {
+    setEditingCategoryId(undefined);
+    setActiveTab('categories');
+  };
+
+  // Função para sucesso na edição de categoria
+  const handleCategoryEditSuccess = () => {
+    setEditingCategoryId(undefined);
+    setActiveTab('categories');
+    loadCategories(); // Recarregar lista
+  };
+
+  // Função para categoria criada
+  const handleCategoryCreated = () => {
+    loadCategories(); // Recarregar lista
+  };
+
+  // Função para categoria deletada
+  const handleCategoryDeleted = () => {
+    loadCategories(); // Recarregar lista
+  };
+
   useEffect(() => {
     const fetchResults = async () => {
       try {
@@ -117,12 +163,15 @@ function AdminDashboardContent() {
     fetchResults();
     loadChampionships();
     loadRallies();
+    loadCategories();
   }, []);
 
-  // Carregar campeonatos quando a aba de campeonato for ativada
+  // Carregar dados quando as abas forem ativadas
   useEffect(() => {
     if (activeTab === 'championship') {
       loadChampionships();
+    } else if (activeTab === 'categories') {
+      loadCategories();
     }
   }, [activeTab]);
 
@@ -237,6 +286,16 @@ function AdminDashboardContent() {
         >
           Campeonato
         </button>
+        <button
+          onClick={() => setActiveTab("categories")}
+          className={`pb-2 px-4 ${
+            activeTab === "categories"
+              ? "border-b-2 border-blue-500 text-blue-600"
+              : "text-gray-600 hover:text-gray-800"
+          }`}
+        >
+          Categorias
+        </button>
         {editingChampionshipId && (
           <button
             onClick={() => setActiveTab("edit-championship")}
@@ -261,6 +320,18 @@ function AdminDashboardContent() {
             Editar Rally
           </button>
         )}
+        {editingCategoryId && (
+          <button
+            onClick={() => setActiveTab("edit-category")}
+            className={`pb-2 px-4 ${
+              activeTab === "edit-category"
+                ? "border-b-2 border-blue-500 text-blue-600"
+                : "text-gray-600 hover:text-gray-800"
+            }`}
+          >
+            Editar Categoria
+          </button>
+        )}
       </div>
 
       {/* Conteúdo das abas */}
@@ -280,6 +351,24 @@ function AdminDashboardContent() {
             rallyId={editingRallyId}
             onSuccess={handleRallyEditSuccess}
             onCancel={handleCancelRallyEdit}
+          />
+        </div>
+      )}
+
+      {activeTab === "edit-category" && editingCategoryId && (
+        <div>
+          <div className="mb-4">
+            <Button 
+              variant="outline" 
+              onClick={handleCancelCategoryEdit}
+            >
+              ← Voltar para Categorias
+            </Button>
+          </div>
+          <CarCategoryEditFormRHF 
+            categoryId={editingCategoryId}
+            onCategoryUpdated={handleCategoryEditSuccess}
+            onCategoryDeleted={handleCategoryEditSuccess}
           />
         </div>
       )}
@@ -477,6 +566,29 @@ function AdminDashboardContent() {
           {currentStep === 'import' && (
             <ChampionshipImportForm />
           )}
+        </div>
+      )}
+
+      {activeTab === "categories" && (
+        <div>
+          <h1 className="text-2xl font-bold mb-6">Gerenciar Categorias de Carros</h1>
+          
+          {/* Tabela de categorias existentes */}
+          <div className="mb-8">
+            <CarCategoriesTable 
+              categories={categories}
+              onEdit={handleEditCategory}
+              onCategoryDeleted={handleCategoryDeleted}
+            />
+          </div>
+          
+          {/* Formulário para criar nova categoria */}
+          <div className="mb-8">
+            <h2 className="text-xl font-bold mb-4">Criar Nova Categoria</h2>
+            <CarCategoryCreateFormRHF 
+              onCategoryCreated={handleCategoryCreated}
+            />
+          </div>
         </div>
       )}
     </div>

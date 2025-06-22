@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react"
+import { useEffect, useCallback, useState } from "react"
 import { Resolver, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -10,14 +10,17 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { getAllChampionships, getRalliesByChampionship } from "@/lib/championshipDB"
+import { getCarCategories } from "@/lib/carCategoryDB"
 import { formatDatabaseDate } from "@/lib/utils"
 import { useAdminForms } from '@/contexts/AdminFormsContext'
+import { RsfCarCategory } from "@/types/championship"
 
 const importSchema = z.object({
   championshipId: z.string().min(1, "Campeonato é obrigatório"),
   rallyId: z.string().min(1, "Rally é obrigatório"),
   stageName: z.string().min(1, "Nome da especial é obrigatório"),
   stageNumber: z.string().min(1, "Número da especial é obrigatório"),
+  categoryId: z.string().min(1, "Categoria é obrigatória"),
   file: z.any().refine((file) => file instanceof File, "Arquivo é obrigatório")
     .refine((file) => file?.size <= 10 * 1024 * 1024, "Arquivo muito grande. Tamanho máximo: 10MB")
     .refine(
@@ -54,6 +57,9 @@ export default function ChampionshipImportFormRHF({
     setSuccess
   } = useAdminForms()
 
+  const [categories, setCategories] = useState<RsfCarCategory[]>([])
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false)
+
   const form = useForm<ImportFormData>({
     resolver: zodResolver(importSchema) as Resolver<ImportFormData>,
     defaultValues: {
@@ -61,6 +67,7 @@ export default function ChampionshipImportFormRHF({
       rallyId: preselectedRallyId?.toString() || "",
       stageName: "",
       stageNumber: "",
+      categoryId: "",
       file: undefined,
     },
   })
@@ -86,8 +93,21 @@ export default function ChampionshipImportFormRHF({
     }
   }, [setRallies, setError])
 
+  const loadCategories = useCallback(async () => {
+    try {
+      setIsLoadingCategories(true)
+      const data = await getCarCategories()
+      setCategories(data)
+    } catch (error) {
+      setError(`Erro ao carregar categorias: ${error}`)
+    } finally {
+      setIsLoadingCategories(false)
+    }
+  }, [setError])
+
   useEffect(() => {
     loadChampionships()
+    loadCategories()
   }, [])
 
   useEffect(() => {
@@ -112,8 +132,9 @@ export default function ChampionshipImportFormRHF({
       formData.append('rallyId', data.rallyId)
       formData.append('stageName', data.stageName)
       formData.append('stageNumber', data.stageNumber)
+      formData.append('categoryId', data.categoryId)
 
-      const response = await fetch('/api/import-results', {
+      const response = await fetch('/api/championship/import-csv', {
         method: 'POST',
         body: formData,
       })
@@ -131,6 +152,7 @@ export default function ChampionshipImportFormRHF({
         rallyId: preselectedRallyId?.toString() || "",
         stageName: "",
         stageNumber: "",
+        categoryId: "",
         file: undefined,
       })
       
@@ -150,6 +172,11 @@ export default function ChampionshipImportFormRHF({
   const rallyOptions = rallies.map(rally => ({
     value: rally.id.toString(),
     label: `${rally.name} - ${formatDatabaseDate(rally.rally_date)}`
+  }))
+
+  const categoryOptions = categories.map(category => ({
+    value: category.id.toString(),
+    label: category.name
   }))
 
   return (
@@ -231,6 +258,21 @@ export default function ChampionshipImportFormRHF({
 
             <FormField
               control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormSelectField
+                  label="Categoria *"
+                  placeholder={isLoadingCategories ? "Carregando..." : "Selecione uma categoria"}
+                  options={categoryOptions}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={isLoadingCategories}
+                />
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="file"
               render={({ field: { onChange, ...field } }) => {
                 return (
@@ -260,15 +302,18 @@ export default function ChampionshipImportFormRHF({
                 O arquivo deve conter as seguintes colunas (na ordem):
               </p>
               <code className="text-xs bg-background p-2 rounded block">
-                Posição,Número,Piloto,Navegador,Categoria,Tempo,Penalidade
+                Posição,Número,Piloto,Navegador,Tempo,Penalidade
               </code>
               <p className="text-xs text-muted-foreground mt-2">
-                Exemplo: 1,101,João Silva,Maria Santos,N4,00:05:30.50,00:00:00
+                Exemplo: 1,101,João Silva,Maria Santos,00:05:30.50,00:00:00
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                <strong>Nota:</strong> A categoria será aplicada automaticamente a todos os carros do arquivo com base na seleção acima.
               </p>
             </div>
 
             <div className="flex gap-2 pt-4">
-              <Button type="submit" disabled={isLoading || isLoadingChampionships}>
+              <Button type="submit" disabled={isLoading || isLoadingChampionships || isLoadingCategories}>
                 {isLoading ? "Importando..." : "Importar Resultados"}
               </Button>
             </div>

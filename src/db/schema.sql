@@ -57,65 +57,6 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 
 
 
-
-CREATE OR REPLACE FUNCTION "public"."update_championship_standings"("p_championship_id" integer) RETURNS "void"
-    LANGUAGE "plpgsql"
-    AS $$
-BEGIN
-    -- Recalcular pontos totais e estatísticas
-    UPDATE championship_standings cs
-    SET 
-        total_points = (
-            SELECT COALESCE(SUM(rp.points_earned), 0)
-            FROM rally_points rp
-            JOIN rallies r ON rp.rally_id = r.id
-            WHERE r.championship_id = p_championship_id 
-            AND rp.pilot_id = cs.pilot_id
-        ),
-        rallies_completed = (
-            SELECT COUNT(*)
-            FROM rally_points rp
-            JOIN rallies r ON rp.rally_id = r.id
-            WHERE r.championship_id = p_championship_id 
-            AND rp.pilot_id = cs.pilot_id
-        ),
-        wins = (
-            SELECT COUNT(*)
-            FROM rally_points rp
-            JOIN rallies r ON rp.rally_id = r.id
-            WHERE r.championship_id = p_championship_id 
-            AND rp.pilot_id = cs.pilot_id
-            AND rp.overall_position = 1
-        ),
-        podiums = (
-            SELECT COUNT(*)
-            FROM rally_points rp
-            JOIN rallies r ON rp.rally_id = r.id
-            WHERE r.championship_id = p_championship_id 
-            AND rp.pilot_id = cs.pilot_id
-            AND rp.overall_position <= 3
-        ),
-        last_updated = CURRENT_TIMESTAMP
-    WHERE cs.championship_id = p_championship_id;
-    
-    -- Atualizar posições atuais
-    WITH ranked_pilots AS (
-        SELECT 
-            pilot_id,
-            ROW_NUMBER() OVER (ORDER BY total_points DESC, wins DESC, podiums DESC) as new_position
-        FROM championship_standings
-        WHERE championship_id = p_championship_id
-    )
-    UPDATE championship_standings cs
-    SET current_position = rp.new_position
-    FROM ranked_pilots rp
-    WHERE cs.pilot_id = rp.pilot_id AND cs.championship_id = p_championship_id;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."update_championship_standings"("p_championship_id" integer) OWNER TO "postgres";
-
 SET default_tablespace = '';
 
 SET default_table_access_method = "heap";
@@ -174,11 +115,39 @@ COMMENT ON TABLE "public"."rsf-users" IS 'Pilotos do RSF';
 
 
 
+CREATE TABLE IF NOT EXISTS "public"."rsf_car_categories" (
+    "id" integer NOT NULL,
+    "name" character varying(50) NOT NULL,
+    "description" character varying(200),
+    "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE "public"."rsf_car_categories" OWNER TO "postgres";
+
+
+CREATE SEQUENCE IF NOT EXISTS "public"."rsf_car_categories_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE "public"."rsf_car_categories_id_seq" OWNER TO "postgres";
+
+
+ALTER SEQUENCE "public"."rsf_car_categories_id_seq" OWNED BY "public"."rsf_car_categories"."id";
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."rsf_cars" (
     "id" integer NOT NULL,
     "model" character varying(100) NOT NULL,
     "category" character varying(50) DEFAULT 'R2'::character varying,
-    "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+    "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    "category_id" integer
 );
 
 
@@ -333,7 +302,8 @@ CREATE TABLE IF NOT EXISTS "public"."rsf_rally_points" (
     "overall_position" integer NOT NULL,
     "total_time" interval NOT NULL,
     "points_earned" integer DEFAULT 0,
-    "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+    "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    "category_id" integer
 );
 
 
@@ -501,6 +471,10 @@ CREATE OR REPLACE VIEW "public"."v_rsf_rally_detailed_results" AS
 ALTER TABLE "public"."v_rsf_rally_detailed_results" OWNER TO "postgres";
 
 
+ALTER TABLE ONLY "public"."rsf_car_categories" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."rsf_car_categories_id_seq"'::"regclass");
+
+
+
 ALTER TABLE ONLY "public"."rsf_cars" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."rsf_cars_id_seq"'::"regclass");
 
 
@@ -545,6 +519,16 @@ ALTER TABLE ONLY "public"."rsf-users"
 
 ALTER TABLE ONLY "public"."rsf-users"
     ADD CONSTRAINT "rsf-users_rsf_id_key" UNIQUE ("rsf_id");
+
+
+
+ALTER TABLE ONLY "public"."rsf_car_categories"
+    ADD CONSTRAINT "rsf_car_categories_name_key" UNIQUE ("name");
+
+
+
+ALTER TABLE ONLY "public"."rsf_car_categories"
+    ADD CONSTRAINT "rsf_car_categories_pkey" PRIMARY KEY ("id");
 
 
 
@@ -628,11 +612,23 @@ ALTER TABLE ONLY "public"."rsf_wrc_points_system"
 
 
 
+CREATE INDEX "idx_rsf_cars_category" ON "public"."rsf_cars" USING "btree" ("category_id");
+
+
+
+CREATE INDEX "idx_rsf_cars_category_id" ON "public"."rsf_cars" USING "btree" ("category_id");
+
+
+
 CREATE INDEX "idx_rsf_championship_standings_points" ON "public"."rsf_championship_standings" USING "btree" ("championship_id", "total_points" DESC);
 
 
 
 CREATE INDEX "idx_rsf_pilots_nationality" ON "public"."rsf_pilots" USING "btree" ("nationality");
+
+
+
+CREATE INDEX "idx_rsf_rally_points_category_id" ON "public"."rsf_rally_points" USING "btree" ("category_id");
 
 
 
@@ -657,6 +653,11 @@ ALTER TABLE ONLY "public"."rsf-results"
 
 
 
+ALTER TABLE ONLY "public"."rsf_cars"
+    ADD CONSTRAINT "rsf_cars_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."rsf_car_categories"("id");
+
+
+
 ALTER TABLE ONLY "public"."rsf_championship_standings"
     ADD CONSTRAINT "rsf_championship_standings_championship_id_fkey" FOREIGN KEY ("championship_id") REFERENCES "public"."rsf_championships"("id") ON DELETE CASCADE;
 
@@ -669,6 +670,11 @@ ALTER TABLE ONLY "public"."rsf_championship_standings"
 
 ALTER TABLE ONLY "public"."rsf_rallies"
     ADD CONSTRAINT "rsf_rallies_championship_id_fkey" FOREIGN KEY ("championship_id") REFERENCES "public"."rsf_championships"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."rsf_rally_points"
+    ADD CONSTRAINT "rsf_rally_points_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."rsf_car_categories"("id");
 
 
 
@@ -711,6 +717,10 @@ CREATE POLICY "Enable insert for authenticated users only" ON "public"."rsf-resu
 
 
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."rsf-users" FOR INSERT TO "authenticated" WITH CHECK (true);
+
+
+
+CREATE POLICY "Enable insert for authenticated users only" ON "public"."rsf_car_categories" FOR INSERT TO "authenticated" WITH CHECK (true);
 
 
 
@@ -758,6 +768,10 @@ CREATE POLICY "Enable read access for all users" ON "public"."rsf-users" FOR SEL
 
 
 
+CREATE POLICY "Enable read access for all users" ON "public"."rsf_car_categories" FOR SELECT USING (true);
+
+
+
 CREATE POLICY "Enable read access for all users" ON "public"."rsf_cars" FOR SELECT USING (true);
 
 
@@ -791,6 +805,10 @@ CREATE POLICY "Enable read access for all users" ON "public"."rsf_stages" FOR SE
 
 
 CREATE POLICY "Enable read access for all users" ON "public"."rsf_wrc_points_system" FOR SELECT USING (true);
+
+
+
+CREATE POLICY "Enable update for authenticated users only" ON "public"."rsf_car_categories" FOR UPDATE TO "authenticated" USING (true);
 
 
 
@@ -837,6 +855,9 @@ ALTER TABLE "public"."rsf-results" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."rsf-users" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."rsf_car_categories" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."rsf_cars" ENABLE ROW LEVEL SECURITY;
@@ -1054,12 +1075,6 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."update_championship_standings"("p_championship_id" integer) TO "anon";
-GRANT ALL ON FUNCTION "public"."update_championship_standings"("p_championship_id" integer) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."update_championship_standings"("p_championship_id" integer) TO "service_role";
-
-
-
 
 
 
@@ -1090,6 +1105,18 @@ GRANT ALL ON TABLE "public"."rsf-results" TO "service_role";
 GRANT ALL ON TABLE "public"."rsf-users" TO "anon";
 GRANT ALL ON TABLE "public"."rsf-users" TO "authenticated";
 GRANT ALL ON TABLE "public"."rsf-users" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."rsf_car_categories" TO "anon";
+GRANT ALL ON TABLE "public"."rsf_car_categories" TO "authenticated";
+GRANT ALL ON TABLE "public"."rsf_car_categories" TO "service_role";
+
+
+
+GRANT ALL ON SEQUENCE "public"."rsf_car_categories_id_seq" TO "anon";
+GRANT ALL ON SEQUENCE "public"."rsf_car_categories_id_seq" TO "authenticated";
+GRANT ALL ON SEQUENCE "public"."rsf_car_categories_id_seq" TO "service_role";
 
 
 

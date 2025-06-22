@@ -37,6 +37,7 @@ interface ChampionshipStanding {
   rallies_completed: number;
   wins: number;
   podiums: number;
+  pilot_category?: string;
 }
 
 interface StageResultWithPilot {
@@ -439,9 +440,14 @@ export default function ChampionshipDetails() {
                         <p className="font-semibold text-white">
                           {standing.real_name || standing.username}
                         </p>
-                        <p className="text-xs text-white/60">
-                          {standing.rallies_completed} rallies • {standing.wins} vitórias • {standing.podiums} pódios
-                        </p>
+                        <div className="flex items-center gap-2 text-xs text-white/60">
+                          <span>{standing.rallies_completed} rallies • {standing.wins} vitórias • {standing.podiums} pódios</span>
+                          {standing.pilot_category && (
+                            <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full border border-orange-500/30">
+                              {standing.pilot_category}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
